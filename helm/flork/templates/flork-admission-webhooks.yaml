@@ -1,0 +1,85 @@
+#
+# Copyright 2021-2022 Micro Focus or one of its affiliates
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: admission.flinkjobs.{{ .Values.crd.group }}
+webhooks:
+  - name: admission.flinkjobs.{{ .Values.crd.group }}
+    matchPolicy: Equivalent
+    failurePolicy: Fail
+    rules:
+    - apiGroups:
+      - "{{ .Values.crd.group }}"
+      apiVersions:
+      - "v1"
+      operations:
+      - "CREATE"
+      - "UPDATE"
+      resources:
+      - flinkjobs
+      scope: "Namespaced"
+    clientConfig:
+      {{- if .Values.deployment.tls.caCert }}
+      caBundle: {{ .Values.deployment.tls.caCert | trim | b64enc | quote }}
+      {{- else }}
+      caBundle: {{ .Files.Get "certs/ca.crt" | trim | b64enc | quote }}
+      {{- end }}
+      service:
+        namespace: {{ .Release.Namespace }}
+        name: itom-flork-admission-svc
+        port: 443
+        path: "{{ .Values.deployment.http.pathPrefix }}/webhooks/admission/flinkjob"
+    admissionReviewVersions:
+    - "v1"
+    sideEffects: None
+    timeoutSeconds: 5
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: admission.flinksessions.{{ .Values.crd.group }}
+webhooks:
+  - name: admission.flinksessions.{{ .Values.crd.group }}
+    matchPolicy: Equivalent
+    failurePolicy: Fail
+    rules:
+    - apiGroups:
+      - "{{ .Values.crd.group }}"
+      apiVersions:
+      - "v1"
+      operations:
+      - "CREATE"
+      - "UPDATE"
+      resources:
+      - flinksessions
+      scope: "Namespaced"
+    clientConfig:
+      {{- if .Values.deployment.tls.caCert }}
+      caBundle: {{ .Values.deployment.tls.caCert | trim | b64enc | quote }}
+      {{- else }}
+      caBundle: {{ .Files.Get "certs/ca.crt" | trim | b64enc | quote }}
+      {{- end }}
+      service:
+        namespace: {{ .Release.Namespace }}
+        name: itom-flork-admission-svc
+        port: 443
+        path: "{{ .Values.deployment.http.pathPrefix }}/webhooks/admission/flinksession"
+    admissionReviewVersions:
+    - "v1"
+    sideEffects: None
+    timeoutSeconds: 5

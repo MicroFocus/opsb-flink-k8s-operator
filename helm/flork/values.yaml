@@ -1,0 +1,64 @@
+#
+# Copyright 2021-2022 Micro Focus or one of its affiliates
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+images:
+  florkService:
+    image: "itom-flork-service"
+    imageTag: "0.1.0-develop.33"
+
+global:
+  docker: {}
+  securityContext: {}
+  rbac:
+    serviceAccountCreate: true
+    roleCreate: true
+
+# deployment holds values that could be configured by the user
+deployment:
+  tenants:
+  - id: default
+    namespaces:
+    - '*'
+  rbac:
+    clusterRoleName: itom-flork-role
+    serviceAccountSuffix: itom-flork-sa
+  tls: {}
+  controller:
+    readinessProbe:
+      initialDelaySeconds: 10
+      periodSeconds: 10
+      failureThreshold: 12
+      httpGet:
+        path: /flork/v1/api/base/v1/ready
+        port: 8443
+        scheme: HTTPS
+  http:
+    serviceNameSuffix: "itom-flork"
+    pathPrefix: "/flork/v1/api"
+
+# Would have higher precedence than global.nodeSelector
+nodeSelector: {}
+
+# the ones below aren't meant to be configurable and can even break stuff if changed
+
+# custom resource definition
+crd:
+  group: "flork.itom.com"
+
+# Potential overrides, don't change unless you know what you're doing
+
+docker: # {} TODO
+  registry: itom-docker-opr.suoartifactory.swinfra.net:443
+  orgName: hpeswitomsandbox

@@ -1,0 +1,15 @@
+*                text=auto
+Jenkinsfile      text
+Dockerfile       text
+*.xml            text
+*.txt            text
+*.java           text
+*.md             text
+*.crt            text
+*.key            text
+*.jar            binary
+*.jks            binary
+*.p12            binary
+gradlew          text eol=lf
+*.sh             text eol=lf
+*.bat            text eol=crlf

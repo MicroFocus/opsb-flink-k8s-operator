@@ -1,0 +1,110 @@
+#
+# Copyright 2021-2022 Micro Focus or one of its affiliates
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+{{- range $tenant := $.Values.deployment.tenants }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $tenant.id }}-itom-flork-controller
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app.kubernetes.io/managed-by: {{ $.Release.Name }}
+    app.kubernetes.io/name: {{ $tenant.id }}-itom-flork-controller
+    app.kubernetes.io/version: {{ $.Values.images.florkService.imageTag }}
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: flork-controller
+      tenancy.flork.itom.com/tenant-id: {{ $tenant.id }}
+  template:
+    metadata:
+      labels:
+        app: flork-controller
+        tenancy.flork.itom.com/tenant-id: {{ $tenant.id }}
+        admission.flork.itom.com/validation: "true"
+    spec:
+      serviceAccountName: {{ $tenant.id }}-{{ $.Values.deployment.rbac.serviceAccountSuffix }}
+      securityContext:
+        runAsUser: {{ $.Values.global.securityContext.user | default 1999 }}
+        runAsGroup: {{ $.Values.global.securityContext.fsGroup | default 1999 }}
+        fsGroup: {{ $.Values.global.securityContext.fsGroup | default 1999 }}
+        runAsNonRoot: true
+      containers:
+      - name: controller
+        image: {{ coalesce $.Values.images.florkService.dockerRegistry $.Values.docker.registry $.Values.global.docker.registry -}}
+        / {{- coalesce $.Values.images.florkService.orgName $.Values.docker.orgName $.Values.global.docker.orgName -}}
+        / {{- $.Values.images.florkService.image -}}
+        : {{- $.Values.images.florkService.imageTag }}
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "1"
+          limits:
+            memory: "512Mi"
+            cpu: "2"
+        env:
+        - name: TENANT_ID
+          value: "{{ $tenant.id }}"
+        - name: MANAGED_NAMESPACES
+          value: "{{ join "," $tenant.namespaces }}"
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        {{- if $.Values.deployment.controller.readinessProbe }}
+        readinessProbe: {{- toYaml $.Values.deployment.controller.readinessProbe | nindent 10 }}
+        {{- end }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+        volumeMounts:
+        - name: cert-storage
+          mountPath: /opt/flork/tls
+        - name: trust-storage
+          mountPath: /opt/flork/tls/trustedCAs
+        - name: tmp-storage
+          mountPath: /tmp
+        - name: log-storage
+          mountPath: /service/log
+        - name: conf-storage
+          mountPath: /service/conf
+      {{- with (coalesce $.Values.nodeSelector $.Values.global.nodeSelector) }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      - name: cert-storage
+        secret:
+          secretName: itom-flork-controller-tls
+          items:
+          - key: tls.crt
+            path: server.crt
+          - key: tls.key
+            path: server.key
+      - name: trust-storage
+        configMap:
+          name: {{ $tenant.id }}-trusted-certs
+      - name: tmp-storage
+        emptyDir:
+          medium: Memory
+      - name: log-storage
+        emptyDir:
+          medium: Memory
+      - name: conf-storage
+        emptyDir:
+          medium: Memory
+{{- end }}

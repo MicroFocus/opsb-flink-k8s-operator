@@ -1,0 +1,262 @@
+---
+basePath: "/"
+definitions:
+  AdmissionRequest:
+    type: "object"
+    properties:
+      dryRun:
+        type: "boolean"
+      kind:
+        $ref: "#/definitions/GroupVersionKind"
+      name:
+        type: "string"
+      namespace:
+        type: "string"
+      object:
+        $ref: "#/definitions/KubernetesResource"
+      oldObject:
+        $ref: "#/definitions/KubernetesResource"
+      operation:
+        type: "string"
+      options:
+        $ref: "#/definitions/KubernetesResource"
+      requestKind:
+        $ref: "#/definitions/GroupVersionKind"
+      requestResource:
+        $ref: "#/definitions/GroupVersionResource"
+      requestSubResource:
+        type: "string"
+      resource:
+        $ref: "#/definitions/GroupVersionResource"
+      subResource:
+        type: "string"
+      uid:
+        type: "string"
+      userInfo:
+        $ref: "#/definitions/UserInfo"
+  AdmissionResponse:
+    type: "object"
+    properties:
+      allowed:
+        type: "boolean"
+      auditAnnotations:
+        additionalProperties:
+          type: "string"
+        type: "object"
+      patch:
+        type: "string"
+      patchType:
+        type: "string"
+      status:
+        $ref: "#/definitions/Status"
+      uid:
+        type: "string"
+      warnings:
+        items:
+          type: "string"
+        type: "array"
+  AdmissionReview:
+    type: "object"
+    properties:
+      apiVersion:
+        type: "string"
+      kind:
+        type: "string"
+      request:
+        $ref: "#/definitions/AdmissionRequest"
+      response:
+        $ref: "#/definitions/AdmissionResponse"
+  GroupVersionKind:
+    type: "object"
+    properties:
+      group:
+        type: "string"
+      kind:
+        type: "string"
+      version:
+        type: "string"
+  GroupVersionResource:
+    type: "object"
+    properties:
+      group:
+        type: "string"
+      resource:
+        type: "string"
+      version:
+        type: "string"
+  KubernetesResource:
+    type: "object"
+  ListMeta:
+    type: "object"
+    properties:
+      continue:
+        type: "string"
+      remainingItemCount:
+        format: "int64"
+        type: "integer"
+      resourceVersion:
+        type: "string"
+      selfLink:
+        type: "string"
+  Status:
+    type: "object"
+    properties:
+      apiVersion:
+        type: "string"
+      code:
+        format: "int32"
+        type: "integer"
+      details:
+        $ref: "#/definitions/StatusDetails"
+      kind:
+        type: "string"
+      message:
+        type: "string"
+      metadata:
+        $ref: "#/definitions/ListMeta"
+      reason:
+        type: "string"
+      status:
+        type: "string"
+  StatusCause:
+    type: "object"
+    properties:
+      field:
+        type: "string"
+      message:
+        type: "string"
+      reason:
+        type: "string"
+  StatusDetails:
+    type: "object"
+    properties:
+      causes:
+        items:
+          $ref: "#/definitions/StatusCause"
+        type: "array"
+      group:
+        type: "string"
+      kind:
+        type: "string"
+      name:
+        type: "string"
+      retryAfterSeconds:
+        format: "int32"
+        type: "integer"
+      uid:
+        type: "string"
+  UserInfo:
+    type: "object"
+    properties:
+      extra:
+        additionalProperties:
+          items:
+            type: "string"
+          type: "array"
+        type: "object"
+      groups:
+        items:
+          type: "string"
+        type: "array"
+      uid:
+        type: "string"
+      username:
+        type: "string"
+host: "itom-flork:8443"
+info:
+  description: ""
+  title: "TBD"
+  version: "0.0.0-snapshot.0"
+paths:
+  /no-crd/helm-hooks/post-upgrade:
+    put:
+      description: ""
+      operationId: "pauseAfterUpgrade"
+      responses:
+        "201":
+          description: "Paused."
+        "204":
+          description: "Pause not needed."
+      summary: "Pauses the CM-based reconcilers indefinitely after a successful upgrade\
+        \ but before new containers are running."
+      tags:
+      - "Endpoints that can be used by Helm hooks."
+  /no-crd/helm-hooks/pre-upgrade:
+    put:
+      consumes:
+      - "text/plain"
+      description: ""
+      operationId: "pauseForUpgrade"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          type: "integer"
+          format: "int64"
+      responses:
+        "200":
+          description: "Was already paused."
+        "201":
+          description: "Paused."
+      summary: "Pauses the CM-based reconcilers."
+      tags:
+      - "Endpoints that can be used by Helm hooks."
+  /webhooks/admission/flinkjob:
+    post:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "reviewFlinkJobRequest"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/AdmissionReview"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "Resource associated with the request is allowed."
+          schema:
+            $ref: "#/definitions/AdmissionReview"
+        "400":
+          description: "Something in the resource is not allowed."
+        "500":
+          description: "Internal Server Error."
+      summary: "Validates a FlinkJob CR."
+      tags:
+      - "Flork's validating admission webhooks."
+  /webhooks/admission/flinksession:
+    post:
+      consumes:
+      - "application/json"
+      description: ""
+      operationId: "reviewFlinkSessionRequest"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: false
+        schema:
+          $ref: "#/definitions/AdmissionReview"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "Resource associated with the request is allowed."
+          schema:
+            $ref: "#/definitions/AdmissionReview"
+        "400":
+          description: "Something in the resource is not allowed."
+        "500":
+          description: "Internal Server Error."
+      summary: "Validates a FlinkSession CR."
+      tags:
+      - "Flork's validating admission webhooks."
+schemes:
+- "https"
+swagger: "2.0"
+tags:
+- name: "Endpoints that can be used by Helm hooks."
+- name: "Flork's validating admission webhooks."
