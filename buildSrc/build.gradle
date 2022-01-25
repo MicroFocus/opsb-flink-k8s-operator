@@ -22,6 +22,12 @@ ext {
     kotlinVersion = "1.6.10" // sync with itom-kotlin-plugin.gradle
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+
 repositories {
     gradlePluginPortal()
     mavenCentral()
