@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-rootProject.name = "flork-spring-service"
+rootProject.name = "itom-flork"
 
 include ":dummy-for-bundled-licenses"
 include ":flink-kubernetes-shadow"
