@@ -63,7 +63,7 @@ class ShadingTransformer implements Transformer {
                 if (line.isEmpty() || line.startsWith("#")) {
                     continue
                 }
-                data.write("shaded.flink.".bytes)
+                data.write("shadow.flink.".bytes)
                 data.write(line.bytes)
                 data.write('\n'.bytes)
             }
