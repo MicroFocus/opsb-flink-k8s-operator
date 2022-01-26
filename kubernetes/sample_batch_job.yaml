@@ -44,17 +44,13 @@ spec:
     containers:
     - name: flink-main-container
       volumeMounts:
-#      - name: flink-storage
-#        subPath: conf
-#        mountPath: /opt/flink/conf
       - name: flink-storage
         subPath: log
         mountPath: /opt/flink/log
     volumes:
     - name: flink-storage
-      hostPath:
-        path: /mnt/flink
-        type: Directory
+      emptyDir:
+        medium: Memory
   taskManagerPodSpec:
     securityContext:
       runAsUser: 1999
@@ -63,14 +59,10 @@ spec:
     containers:
     - name: flink-main-container
       volumeMounts:
-#      - name: flink-storage
-#        subPath: conf
-#        mountPath: /opt/flink/conf
       - name: flink-storage
         subPath: log
         mountPath: /opt/flink/log
     volumes:
     - name: flink-storage
-      hostPath:
-        path: /mnt/flink
-        type: Directory
+      emptyDir:
+        medium: Memory
