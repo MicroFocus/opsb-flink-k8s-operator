@@ -54,10 +54,8 @@ object FlinkConfUtils {
     private val defaultLogConfFiles = mutableMapOf(
             "log4j.properties" to "",
             "log4j-console.properties" to "",
-            "log4j-session.properties" to "",
             "logback.xml" to "",
-            "logback-console.xml" to "",
-            "logback-session.xml" to ""
+            "logback-console.xml" to ""
     )
 
     @JvmField
