@@ -66,7 +66,7 @@ class FlinkJobCreatePhase(
         }
     }
 
-    private suspend fun performInitialDeployment(backgroundTaskScope: CoroutineScope, confPath: Path) = withContext(Dispatchers.IO) {
+    private suspend fun performInitialDeployment(backgroundTaskScope: CoroutineScope, confPath: Path) = coroutineScope {
         FlinkConfUtils.prepareConfFilesFromSpec(flinkJob, confPath)
 
         val flinkConfig = runInterruptible {
@@ -99,7 +99,7 @@ class FlinkJobCreatePhase(
         setAsDeployedCoroutine.getAndSet(backgroundCoroutine)?.cancel()
     }
 
-    private suspend fun deployFlinkCluster(flinkConfig: Configuration?) = withContext(Dispatchers.IO) {
+    private suspend fun deployFlinkCluster(flinkConfig: Configuration?) = coroutineScope {
         var seconds = 1L
         while (true) {
             try {
@@ -131,7 +131,7 @@ class FlinkJobCreatePhase(
         }
     }
 
-    private suspend fun checkIfDeploymentActuallyFailed(flinkJob: FlinkJobCustomResource, restTls: Boolean, e: Exception) = withContext(Dispatchers.IO) {
+    private suspend fun checkIfDeploymentActuallyFailed(flinkJob: FlinkJobCustomResource, restTls: Boolean, e: Exception) = coroutineScope {
         if (e !is InterruptedException && deploymentMonitor.addedFlag.get()) {
             if (restTls) {
                 var ex: Throwable = e
@@ -140,11 +140,11 @@ class FlinkJobCreatePhase(
                 }
                 if (ex is IllegalConfigurationException && ex.message?.contains(SecurityOptions.SSL_KEYSTORE.key()) == true) {
                     LOG.debug("Job '{}' enabled TLS for REST but didn't set stores, they are likely dynamically set in the container. Assuming they trust Flork's certificates.", jobKey)
-                    return@withContext
+                    return@coroutineScope
                 }
             }
             LOG.warn("Cluster deployer for '{}' failed but deployment still succeeded:", jobKey, e)
-            return@withContext
+            return@coroutineScope
         }
 
         LOG.error("Could not deploy Flink cluster for '{}'.", jobKey)
@@ -159,7 +159,7 @@ class FlinkJobCreatePhase(
         throw e
     }
     
-    private suspend fun waitForRunningJob(flinkJob: FlinkJobCustomResource, flinkClient: ClusterClient<String>) = withContext(Dispatchers.IO) {
+    private suspend fun waitForRunningJob(flinkJob: FlinkJobCustomResource, flinkClient: ClusterClient<String>) = coroutineScope {
         while (true) {
             try {
                 val jobs = flinkClient.listJobs().await()
@@ -197,7 +197,7 @@ class FlinkJobCreatePhase(
         }
     }
 
-    private suspend fun patchStatus(flinkJob: FlinkJobCustomResource): FlinkJobCustomResource = withContext(Dispatchers.IO) {
+    private suspend fun patchStatus(flinkJob: FlinkJobCustomResource): FlinkJobCustomResource = coroutineScope {
         flinkJob.status.generationDuringLastTransition = observedGeneration
         crOperations.patchStatus(flinkJob)
     }

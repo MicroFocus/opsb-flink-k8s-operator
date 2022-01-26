@@ -85,7 +85,7 @@ open class CoroutineFlinkJobReconcilerPhaser internal constructor(
         }
     }
 
-    private suspend fun reconcileIfNecessary(flinkJob: FlinkJobCustomResource) = withContext(Dispatchers.IO) {
+    private suspend fun reconcileIfNecessary(flinkJob: FlinkJobCustomResource) = coroutineScope {
         val leadingFlag = leading.get()
         val crChanged = observedGeneration > 0L && flinkJob.metadata.generation != observedGeneration
         val reconciliationNeeded = flinkJob.status.generationDuringLastTransition != null && flinkJob.metadata.generation != flinkJob.status.generationDuringLastTransition
@@ -134,20 +134,20 @@ open class CoroutineFlinkJobReconcilerPhaser internal constructor(
                     }
                 }
                 observedGeneration = flinkJob.metadata.generation ?: 1L
-                return@withContext
+                return@coroutineScope
             }
             flinkJob.status.florkPhase.terminal -> {
                 LOG.debug("Letting phaser cancel itself due to terminated job '{}', leading={}.", jobKey, leadingFlag)
             }
             flinkJob.metadata.generation == observedGeneration -> {
-                return@withContext
+                return@coroutineScope
             }
         }
 
         reconcileIfLeading(flinkJob, leadingFlag)
     }
 
-    private suspend fun reconcileIfLeading(flinkJob: FlinkJobCustomResource, leadingFlag: Boolean): Unit = withContext(Dispatchers.IO) {
+    private suspend fun reconcileIfLeading(flinkJob: FlinkJobCustomResource, leadingFlag: Boolean): Unit = coroutineScope {
         observedGeneration = flinkJob.metadata.generation ?: 1L
 
         if (leadingFlag) {
@@ -165,7 +165,7 @@ open class CoroutineFlinkJobReconcilerPhaser internal constructor(
         }
     }
 
-    private suspend fun reconcile(flinkJob: FlinkJobCustomResource): Unit = withContext(Dispatchers.IO) {
+    private suspend fun reconcile(flinkJob: FlinkJobCustomResource): Unit = coroutineScope {
         when (flinkJob.status.florkPhase) {
             FlorkPhase.CREATED -> {
                 // if creation returns, flork-phase must be DEPLOYING or FAILED,
@@ -188,18 +188,18 @@ open class CoroutineFlinkJobReconcilerPhaser internal constructor(
         }
     }
 
-    private suspend fun executeCreationPhase(flinkJob: FlinkJobCustomResource) = withContext(Dispatchers.IO) {
+    private suspend fun executeCreationPhase(flinkJob: FlinkJobCustomResource) = coroutineScope {
         val phase = FlinkJobCreatePhase(jobKey, deploymentMonitor, flinkJob, crOperations, setAsDeployedCoroutine)
         phase.performInitialDeployment(phaserScope.get())
     }
 
-    private suspend fun executeCompletionPhase(flinkJob: FlinkJobCustomResource) = withContext(Dispatchers.IO) {
+    private suspend fun executeCompletionPhase(flinkJob: FlinkJobCustomResource) = coroutineScope {
         val coroutine = phaserScope.get().launch { awaitDeploymentDeletionAndComplete(flinkJob) }
         LOG.info("Waiting for '{}' to terminate.", jobKey)
         setAsCompletedCoroutine.getAndSet(coroutine)?.cancel()
     }
 
-    private suspend fun executeRedeploymentPhase(flinkJob: FlinkJobCustomResource) = withContext(Dispatchers.IO) {
+    private suspend fun executeRedeploymentPhase(flinkJob: FlinkJobCustomResource) = coroutineScope {
         try {
             // update status with potential savepoint path, but only update that
             flinkJob.status = executeShutdownPhase(flinkJob).status
@@ -225,7 +225,7 @@ open class CoroutineFlinkJobReconcilerPhaser internal constructor(
         }
     }
 
-    private suspend fun executeShutdownPhase(flinkJob: FlinkJobCustomResource): FlinkJobCustomResource = withContext(Dispatchers.IO) {
+    private suspend fun executeShutdownPhase(flinkJob: FlinkJobCustomResource): FlinkJobCustomResource = coroutineScope {
         LOG.info("Shutting down Flink cluster for '{}'.", jobKey)
         setAsCompletedCoroutine.getAndSet(null)?.cancel()
 
@@ -253,10 +253,10 @@ open class CoroutineFlinkJobReconcilerPhaser internal constructor(
             flinkJob.status.knownSavepointPath = savepointPath
         }
 
-        return@withContext patchStatus(flinkJob, false)
+        return@coroutineScope patchStatus(flinkJob, false)
     }
 
-    private suspend fun awaitDeploymentDeletionAndComplete(flinkJob: FlinkJobCustomResource) = withContext(Dispatchers.IO) {
+    private suspend fun awaitDeploymentDeletionAndComplete(flinkJob: FlinkJobCustomResource) = coroutineScope {
         runInterruptible { deploymentMonitor.deletionLatch.get().await() }
         LOG.info("Flink job '{}' has either finished, failed, or been cancelled.", jobKey)
 
@@ -280,7 +280,7 @@ open class CoroutineFlinkJobReconcilerPhaser internal constructor(
     }
 
     // generation doesn't change with metadata or status updates
-    private suspend fun patchStatus(flinkJob: FlinkJobCustomResource, updateGeneration: Boolean = true): FlinkJobCustomResource = withContext(Dispatchers.IO) {
+    private suspend fun patchStatus(flinkJob: FlinkJobCustomResource, updateGeneration: Boolean = true): FlinkJobCustomResource = coroutineScope {
         if (updateGeneration) {
             flinkJob.status.generationDuringLastTransition = observedGeneration
         }

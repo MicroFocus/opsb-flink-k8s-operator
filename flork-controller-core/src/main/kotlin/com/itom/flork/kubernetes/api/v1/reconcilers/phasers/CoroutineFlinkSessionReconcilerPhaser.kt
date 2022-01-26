@@ -68,7 +68,7 @@ class CoroutineFlinkSessionReconcilerPhaser internal constructor(
         }
     }
 
-    private suspend fun reconcileIfLeading(flinkSession: FlinkSessionCustomResource): Unit = withContext(Dispatchers.IO) {
+    private suspend fun reconcileIfLeading(flinkSession: FlinkSessionCustomResource): Unit = coroutineScope {
         if (leading.get()) {
             val job = launch { reconcile(flinkSession) }
             // previous job should be automatically cancelled by flow (collectLatest),
@@ -82,7 +82,7 @@ class CoroutineFlinkSessionReconcilerPhaser internal constructor(
         }
     }
 
-    private suspend fun reconcile(flinkSession: FlinkSessionCustomResource): Unit = withContext(Dispatchers.IO) {
+    private suspend fun reconcile(flinkSession: FlinkSessionCustomResource): Unit = coroutineScope {
         when (flinkSession.status.florkPhase) {
             FlorkPhase.CREATED -> {
                 executeCreationPhase(flinkSession)
@@ -116,14 +116,14 @@ class CoroutineFlinkSessionReconcilerPhaser internal constructor(
         }
     }
 
-    private suspend fun executeCreationPhase(flinkSession: FlinkSessionCustomResource) = withContext(Dispatchers.IO) {
+    private suspend fun executeCreationPhase(flinkSession: FlinkSessionCustomResource) = coroutineScope {
     }
 
-    private suspend fun executeShutdownPhase(flinkSession: FlinkSessionCustomResource) = withContext(Dispatchers.IO) {
+    private suspend fun executeShutdownPhase(flinkSession: FlinkSessionCustomResource) = coroutineScope {
     }
 
     // generation doesn't change with metadata or status updates
-    private suspend fun patchStatus(flinkSession: FlinkSessionCustomResource, updateGeneration: Boolean = true): FlinkSessionCustomResource = withContext(Dispatchers.IO) {
+    private suspend fun patchStatus(flinkSession: FlinkSessionCustomResource, updateGeneration: Boolean = true): FlinkSessionCustomResource = coroutineScope {
         if (updateGeneration) {
             flinkSession.status.generationDuringLastTransition = observedGeneration
         }

@@ -23,11 +23,8 @@ import com.itom.flork.kubernetes.api.v1.model.FlinkJobCustomResource
 import com.itom.flork.kubernetes.api.v1.model.FlorkPhase
 import io.fabric8.kubernetes.api.model.DeletionPropagation
 import io.fabric8.kubernetes.client.KubernetesClient
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.future.await
-import kotlinx.coroutines.runInterruptible
-import kotlinx.coroutines.supervisorScope
-import kotlinx.coroutines.withContext
 import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration.CheckpointingOptions
 import org.apache.flink.configuration.GlobalConfiguration
@@ -69,7 +66,7 @@ class FlinkJobShutdownPhase(
         return@withContext savepointPath
     }
 
-    private suspend fun shutDownWithSavepoint() = withContext(Dispatchers.IO) {
+    private suspend fun shutDownWithSavepoint() = coroutineScope {
         // recover configuration for REST client
         val tempConfPath = runInterruptible {
             createTempDirectory(prefix = jobKey.replace("/", "_") + "_").also {
@@ -94,20 +91,20 @@ class FlinkJobShutdownPhase(
         val flinkClusterDescriptor = FlorkUtils.getDescriptorWithTlsIfNeeded(jobKey, factory, flinkConfig,
                 flinkJob.spec.florkConf?.preferClusterInternalService ?: true)
 
-        return@withContext flinkClusterDescriptor.use { descriptor ->
+        return@coroutineScope flinkClusterDescriptor.use { descriptor ->
             descriptor.retrieve(flinkJob.metadata.name).clusterClient.use { flinkClient ->
                 sendSavepointCommand(flinkClient, withSavepoint)
             }
         }
     }
 
-    private suspend fun sendSavepointCommand(flinkClient: ClusterClient<String>, withSavepoint: Boolean) = withContext(Dispatchers.IO) {
+    private suspend fun sendSavepointCommand(flinkClient: ClusterClient<String>, withSavepoint: Boolean) = coroutineScope {
         val job = flinkClient.listJobs().await().firstOrNull()
         if (job == null) {
             LOG.warn("Could not find job corresponding to '{}' in its job manager.", jobKey)
-            return@withContext null
+            return@coroutineScope null
         }
-        return@withContext if (withSavepoint) {
+        return@coroutineScope if (withSavepoint) {
             LOG.info("Stopping '{}' with savepoint.", jobKey)
             val flag = flinkJob.spec.policies?.savepoint?.advanceToEndOfEventTime ?: false
             flinkClient.stopWithSavepoint(job.jobId, flag, null).await()
