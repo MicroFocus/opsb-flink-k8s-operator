@@ -15,8 +15,8 @@
 #
 images:
   florkService:
-    image: "itom-flork-service"
-    imageTag: "0.1.0-develop.33"
+    image: "itom-flork"
+    imageTag: "latest.3"
 
 global:
   docker: {}
@@ -36,17 +36,10 @@ deployment:
     serviceAccountSuffix: itom-flork-sa
   tls: {}
   controller:
-    readinessProbe:
-      initialDelaySeconds: 10
-      periodSeconds: 10
-      failureThreshold: 12
-      httpGet:
-        path: /flork/v1/api/base/v1/ready
-        port: 8443
-        scheme: HTTPS
+    readinessProbe: {}
   http:
     serviceNameSuffix: "itom-flork"
-    pathPrefix: "/flork/v1/api"
+    pathPrefix: "/flork"
 
 # Would have higher precedence than global.nodeSelector
 nodeSelector: {}
@@ -59,6 +52,6 @@ crd:
 
 # Potential overrides, don't change unless you know what you're doing
 
-docker: # {} TODO
-  registry: itom-docker-opr.suoartifactory.swinfra.net:443
-  orgName: hpeswitomsandbox
+docker:
+  registry: localhost:5000
+  orgName: test

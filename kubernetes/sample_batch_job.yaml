@@ -1,0 +1,76 @@
+#
+# Copyright 2021-2022 Micro Focus or one of its affiliates
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+apiVersion: "flork.itom.com/v1"
+kind: FlinkJob
+metadata:
+  name: flork-sample-batch
+  namespace: flork
+spec:
+  florkConf:
+    shadowConfigFiles: false
+  flinkConf:
+    kubernetes.container.image: "localhost:5000/apache/flink:1.14.3-scala_2.12-java8"
+    pipeline.jars: "local:///opt/flink/examples/batch/WordCount.jar"
+    security.ssl.internal.enabled: false
+    security.ssl.rest.enabled: false
+    security.ssl.rest.authentication-enabled: false
+  jobArgs:
+  - "--input"
+  - "/opt/flink/README.txt"
+  - "--output"
+  - "/opt/flink/log/word_count.txt"
+  policies:
+    deletion:
+      trigger: Termination
+  jobManagerPodSpec:
+    serviceAccountName: flork-consumer-sa
+    securityContext:
+      runAsUser: 1999
+      runAsGroup: 1999
+      fsGroup: 1999
+    containers:
+    - name: flink-main-container
+      volumeMounts:
+#      - name: flink-storage
+#        subPath: conf
+#        mountPath: /opt/flink/conf
+      - name: flink-storage
+        subPath: log
+        mountPath: /opt/flink/log
+    volumes:
+    - name: flink-storage
+      hostPath:
+        path: /mnt/flink
+        type: Directory
+  taskManagerPodSpec:
+    securityContext:
+      runAsUser: 1999
+      runAsGroup: 1999
+      fsGroup: 1999
+    containers:
+    - name: flink-main-container
+      volumeMounts:
+#      - name: flink-storage
+#        subPath: conf
+#        mountPath: /opt/flink/conf
+      - name: flink-storage
+        subPath: log
+        mountPath: /opt/flink/log
+    volumes:
+    - name: flink-storage
+      hostPath:
+        path: /mnt/flink
+        type: Directory

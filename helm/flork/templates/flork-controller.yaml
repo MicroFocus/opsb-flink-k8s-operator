@@ -51,16 +51,18 @@ spec:
         : {{- $.Values.images.florkService.imageTag }}
         resources:
           requests:
-            memory: "512Mi"
+            memory: "550Mi"
             cpu: "1"
           limits:
-            memory: "512Mi"
+            memory: "550Mi"
             cpu: "2"
         env:
         - name: TENANT_ID
           value: "{{ $tenant.id }}"
         - name: MANAGED_NAMESPACES
           value: "{{ join "," $tenant.namespaces }}"
+        - name: SPRING_PROFILES_ACTIVE
+          value: crd
         - name: POD_NAME
           valueFrom:
             fieldRef:
