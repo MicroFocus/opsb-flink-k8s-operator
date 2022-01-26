@@ -99,10 +99,10 @@ open class CoroutineFlinkJobReconcilerPhaser internal constructor(
             }
             leadingFlag && (crChanged || reconciliationNeeded) -> {
                 when {
-                    crChanged || (observedGeneration == 0L && reconciliationNeeded) -> {
+                    crChanged || observedGeneration == 0L -> {
                         LOG.info("Definition of Flink job '{}' changed, re-deploying.", jobKey)
                     }
-                    reconciliationNeeded -> {
+                    else -> {
                         LOG.info("Detected job that wasn't reconciled by previous leader, re-deploying: {}", jobKey)
                     }
                 }
