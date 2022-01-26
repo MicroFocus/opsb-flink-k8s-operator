@@ -29,15 +29,26 @@ if ! openssl pkcs12 -export -in /opt/flork/tls/server.crt -inkey /opt/flork/tls/
   exit 1
 fi
 
+if [ -e /var/run/secrets/kubernetes.io/serviceaccount/ca.crt ]; then
+  echo "Trying to add kubernetes certificate to trust store."
+  if ! keytool -importcert -storetype PKCS12 -alias kubernetes -file /var/run/secrets/kubernetes.io/serviceaccount/ca.crt -keystore "$SERVER_TRUSTSTORE" -storepass "$password" -noprompt -trustcacerts; then
+    echo "Could not import kubernetes certificate into trust store."
+    exit 1
+  fi
+fi
+
 shopt -s nullglob
 for cert in /opt/flork/tls/trustedCAs/*; do
   if [ ! -d "$cert" ]; then
-    if ! keytool -importcert -storetype PKCS12 -alias "$(basename "$cert")" -file "$cert" -keystore "$SERVER_TRUSTSTORE" -storepass "$password" -noprompt -trustcacerts; then
+    certBaseName=$(basename "$cert")
+    echo "Trying to add $certBaseName to trust store."
+    if ! keytool -importcert -storetype PKCS12 -alias "${certBaseName%.*}" -file "$cert" -keystore "$SERVER_TRUSTSTORE" -storepass "$password" -noprompt -trustcacerts; then
       echo "Could not import $cert into trust store."
       exit 1
     fi
   fi
 done
+shopt -u nullglob
 
 export CLIENT_TRUSTSTORE="$SERVER_TRUSTSTORE"
 
