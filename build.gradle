@@ -75,6 +75,17 @@ task clean {
     }
 }
 
+gradle.taskGraph.whenReady {
+    if (!project.hasProperty("jsonSchemaFlattener")) {
+        gradle.taskGraph.allTasks.each { Task gradleTask ->
+            // "project" will equal each subproject under this folder
+            if (gradleTask.project.name == "json-schema-flattener") {
+                gradleTask.onlyIf = { false } // replace onlyIf closure entirely by using =
+            }
+        }
+    }
+}
+
 // License reporting
 
 licenseReport {

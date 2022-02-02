@@ -17,6 +17,13 @@ properties:
                           key:
                             type: "string"
                           operator:
+                            enum:
+                            - "DoesNotExist"
+                            - "Exists"
+                            - "Gt"
+                            - "In"
+                            - "Lt"
+                            - "NotIn"
                             type: "string"
                           values:
                             items:
@@ -33,6 +40,13 @@ properties:
                           key:
                             type: "string"
                           operator:
+                            enum:
+                            - "DoesNotExist"
+                            - "Exists"
+                            - "Gt"
+                            - "In"
+                            - "Lt"
+                            - "NotIn"
                             type: "string"
                           values:
                             items:
@@ -63,6 +77,13 @@ properties:
                           key:
                             type: "string"
                           operator:
+                            enum:
+                            - "DoesNotExist"
+                            - "Exists"
+                            - "Gt"
+                            - "In"
+                            - "Lt"
+                            - "NotIn"
                             type: "string"
                           values:
                             items:
@@ -79,6 +100,13 @@ properties:
                           key:
                             type: "string"
                           operator:
+                            enum:
+                            - "DoesNotExist"
+                            - "Exists"
+                            - "Gt"
+                            - "In"
+                            - "Lt"
+                            - "NotIn"
                             type: "string"
                           values:
                             items:
@@ -449,6 +477,10 @@ properties:
         image:
           type: "string"
         imagePullPolicy:
+          enum:
+          - "Always"
+          - "IfNotPresent"
+          - "Never"
           type: "string"
         lifecycle:
           properties:
@@ -483,6 +515,9 @@ properties:
                       format: "int-or-string"
                       type: "string"
                     scheme:
+                      enum:
+                      - "HTTP"
+                      - "HTTPS"
                       type: "string"
                   required:
                   - "port"
@@ -529,6 +564,9 @@ properties:
                       format: "int-or-string"
                       type: "string"
                     scheme:
+                      enum:
+                      - "HTTP"
+                      - "HTTPS"
                       type: "string"
                   required:
                   - "port"
@@ -557,6 +595,16 @@ properties:
             failureThreshold:
               format: "int32"
               type: "integer"
+            grpc:
+              properties:
+                port:
+                  format: "int32"
+                  type: "integer"
+                service:
+                  type: "string"
+              required:
+              - "port"
+              type: "object"
             httpGet:
               properties:
                 host:
@@ -579,6 +627,9 @@ properties:
                   format: "int-or-string"
                   type: "string"
                 scheme:
+                  enum:
+                  - "HTTP"
+                  - "HTTPS"
                   type: "string"
               required:
               - "port"
@@ -625,6 +676,10 @@ properties:
               name:
                 type: "string"
               protocol:
+                enum:
+                - "SCTP"
+                - "TCP"
+                - "UDP"
                 type: "string"
             required:
             - "containerPort"
@@ -642,6 +697,16 @@ properties:
             failureThreshold:
               format: "int32"
               type: "integer"
+            grpc:
+              properties:
+                port:
+                  format: "int32"
+                  type: "integer"
+                service:
+                  type: "string"
+              required:
+              - "port"
+              type: "object"
             httpGet:
               properties:
                 host:
@@ -664,6 +729,9 @@ properties:
                   format: "int-or-string"
                   type: "string"
                 scheme:
+                  enum:
+                  - "HTTP"
+                  - "HTTPS"
                   type: "string"
               required:
               - "port"
@@ -750,6 +818,10 @@ properties:
                 localhostProfile:
                   type: "string"
                 type:
+                  enum:
+                  - "Localhost"
+                  - "RuntimeDefault"
+                  - "Unconfined"
                   type: "string"
               required:
               - "type"
@@ -778,6 +850,16 @@ properties:
             failureThreshold:
               format: "int32"
               type: "integer"
+            grpc:
+              properties:
+                port:
+                  format: "int32"
+                  type: "integer"
+                service:
+                  type: "string"
+              required:
+              - "port"
+              type: "object"
             httpGet:
               properties:
                 host:
@@ -800,6 +882,9 @@ properties:
                   format: "int-or-string"
                   type: "string"
                 scheme:
+                  enum:
+                  - "HTTP"
+                  - "HTTPS"
                   type: "string"
               required:
               - "port"
@@ -837,6 +922,9 @@ properties:
         terminationMessagePath:
           type: "string"
         terminationMessagePolicy:
+          enum:
+          - "FallbackToLogsOnError"
+          - "File"
           type: "string"
         tty:
           type: "boolean"
@@ -899,6 +987,11 @@ properties:
         type: "array"
     type: "object"
   dnsPolicy:
+    enum:
+    - "ClusterFirst"
+    - "ClusterFirstWithHostNet"
+    - "Default"
+    - "None"
     type: "string"
   enableServiceLinks:
     type: "boolean"
@@ -993,6 +1086,10 @@ properties:
         image:
           type: "string"
         imagePullPolicy:
+          enum:
+          - "Always"
+          - "IfNotPresent"
+          - "Never"
           type: "string"
         lifecycle:
           properties:
@@ -1027,6 +1124,9 @@ properties:
                       format: "int-or-string"
                       type: "string"
                     scheme:
+                      enum:
+                      - "HTTP"
+                      - "HTTPS"
                       type: "string"
                   required:
                   - "port"
@@ -1073,6 +1173,9 @@ properties:
                       format: "int-or-string"
                       type: "string"
                     scheme:
+                      enum:
+                      - "HTTP"
+                      - "HTTPS"
                       type: "string"
                   required:
                   - "port"
@@ -1101,6 +1204,16 @@ properties:
             failureThreshold:
               format: "int32"
               type: "integer"
+            grpc:
+              properties:
+                port:
+                  format: "int32"
+                  type: "integer"
+                service:
+                  type: "string"
+              required:
+              - "port"
+              type: "object"
             httpGet:
               properties:
                 host:
@@ -1123,6 +1236,9 @@ properties:
                   format: "int-or-string"
                   type: "string"
                 scheme:
+                  enum:
+                  - "HTTP"
+                  - "HTTPS"
                   type: "string"
               required:
               - "port"
@@ -1169,6 +1285,10 @@ properties:
               name:
                 type: "string"
               protocol:
+                enum:
+                - "SCTP"
+                - "TCP"
+                - "UDP"
                 type: "string"
             required:
             - "containerPort"
@@ -1186,6 +1306,16 @@ properties:
             failureThreshold:
               format: "int32"
               type: "integer"
+            grpc:
+              properties:
+                port:
+                  format: "int32"
+                  type: "integer"
+                service:
+                  type: "string"
+              required:
+              - "port"
+              type: "object"
             httpGet:
               properties:
                 host:
@@ -1208,6 +1338,9 @@ properties:
                   format: "int-or-string"
                   type: "string"
                 scheme:
+                  enum:
+                  - "HTTP"
+                  - "HTTPS"
                   type: "string"
               required:
               - "port"
@@ -1294,6 +1427,10 @@ properties:
                 localhostProfile:
                   type: "string"
                 type:
+                  enum:
+                  - "Localhost"
+                  - "RuntimeDefault"
+                  - "Unconfined"
                   type: "string"
               required:
               - "type"
@@ -1322,6 +1459,16 @@ properties:
             failureThreshold:
               format: "int32"
               type: "integer"
+            grpc:
+              properties:
+                port:
+                  format: "int32"
+                  type: "integer"
+                service:
+                  type: "string"
+              required:
+              - "port"
+              type: "object"
             httpGet:
               properties:
                 host:
@@ -1344,6 +1491,9 @@ properties:
                   format: "int-or-string"
                   type: "string"
                 scheme:
+                  enum:
+                  - "HTTP"
+                  - "HTTPS"
                   type: "string"
               required:
               - "port"
@@ -1383,6 +1533,9 @@ properties:
         terminationMessagePath:
           type: "string"
         terminationMessagePolicy:
+          enum:
+          - "FallbackToLogsOnError"
+          - "File"
           type: "string"
         tty:
           type: "boolean"
@@ -1541,6 +1694,10 @@ properties:
         image:
           type: "string"
         imagePullPolicy:
+          enum:
+          - "Always"
+          - "IfNotPresent"
+          - "Never"
           type: "string"
         lifecycle:
           properties:
@@ -1575,6 +1732,9 @@ properties:
                       format: "int-or-string"
                       type: "string"
                     scheme:
+                      enum:
+                      - "HTTP"
+                      - "HTTPS"
                       type: "string"
                   required:
                   - "port"
@@ -1621,6 +1781,9 @@ properties:
                       format: "int-or-string"
                       type: "string"
                     scheme:
+                      enum:
+                      - "HTTP"
+                      - "HTTPS"
                       type: "string"
                   required:
                   - "port"
@@ -1649,6 +1812,16 @@ properties:
             failureThreshold:
               format: "int32"
               type: "integer"
+            grpc:
+              properties:
+                port:
+                  format: "int32"
+                  type: "integer"
+                service:
+                  type: "string"
+              required:
+              - "port"
+              type: "object"
             httpGet:
               properties:
                 host:
@@ -1671,6 +1844,9 @@ properties:
                   format: "int-or-string"
                   type: "string"
                 scheme:
+                  enum:
+                  - "HTTP"
+                  - "HTTPS"
                   type: "string"
               required:
               - "port"
@@ -1717,6 +1893,10 @@ properties:
               name:
                 type: "string"
               protocol:
+                enum:
+                - "SCTP"
+                - "TCP"
+                - "UDP"
                 type: "string"
             required:
             - "containerPort"
@@ -1734,6 +1914,16 @@ properties:
             failureThreshold:
               format: "int32"
               type: "integer"
+            grpc:
+              properties:
+                port:
+                  format: "int32"
+                  type: "integer"
+                service:
+                  type: "string"
+              required:
+              - "port"
+              type: "object"
             httpGet:
               properties:
                 host:
@@ -1756,6 +1946,9 @@ properties:
                   format: "int-or-string"
                   type: "string"
                 scheme:
+                  enum:
+                  - "HTTP"
+                  - "HTTPS"
                   type: "string"
               required:
               - "port"
@@ -1842,6 +2035,10 @@ properties:
                 localhostProfile:
                   type: "string"
                 type:
+                  enum:
+                  - "Localhost"
+                  - "RuntimeDefault"
+                  - "Unconfined"
                   type: "string"
               required:
               - "type"
@@ -1870,6 +2067,16 @@ properties:
             failureThreshold:
               format: "int32"
               type: "integer"
+            grpc:
+              properties:
+                port:
+                  format: "int32"
+                  type: "integer"
+                service:
+                  type: "string"
+              required:
+              - "port"
+              type: "object"
             httpGet:
               properties:
                 host:
@@ -1892,6 +2099,9 @@ properties:
                   format: "int-or-string"
                   type: "string"
                 scheme:
+                  enum:
+                  - "HTTP"
+                  - "HTTPS"
                   type: "string"
               required:
               - "port"
@@ -1929,6 +2139,9 @@ properties:
         terminationMessagePath:
           type: "string"
         terminationMessagePolicy:
+          enum:
+          - "FallbackToLogsOnError"
+          - "File"
           type: "string"
         tty:
           type: "boolean"
@@ -1976,6 +2189,13 @@ properties:
     additionalProperties:
       type: "string"
     type: "object"
+  os:
+    properties:
+      name:
+        type: "string"
+    required:
+    - "name"
+    type: "object"
   overhead:
     additionalProperties:
       type: "string"
@@ -1991,12 +2211,21 @@ properties:
     items:
       properties:
         conditionType:
+          enum:
+          - "ContainersReady"
+          - "Initialized"
+          - "PodScheduled"
+          - "Ready"
           type: "string"
       required:
       - "conditionType"
       type: "object"
     type: "array"
   restartPolicy:
+    enum:
+    - "Always"
+    - "Never"
+    - "OnFailure"
     type: "string"
   runtimeClassName:
     type: "string"
@@ -2033,6 +2262,10 @@ properties:
           localhostProfile:
             type: "string"
           type:
+            enum:
+            - "Localhost"
+            - "RuntimeDefault"
+            - "Unconfined"
             type: "string"
         required:
         - "type"
@@ -2083,10 +2316,17 @@ properties:
     items:
       properties:
         effect:
+          enum:
+          - "NoExecute"
+          - "NoSchedule"
+          - "PreferNoSchedule"
           type: "string"
         key:
           type: "string"
         operator:
+          enum:
+          - "Equal"
+          - "Exists"
           type: "string"
         tolerationSeconds:
           format: "int64"
@@ -2127,6 +2367,9 @@ properties:
         topologyKey:
           type: "string"
         whenUnsatisfiable:
+          enum:
+          - "DoNotSchedule"
+          - "ScheduleAnyway"
           type: "string"
       required:
       - "maxSkew"

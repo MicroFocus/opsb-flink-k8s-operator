@@ -14,12 +14,19 @@
  * limitations under the License.
  */
 
-rootProject.name = "itom-flork"
+package com.microfocus.jsonschema.model
 
-include ":dummy-for-bundled-licenses"
-include ":flink-kubernetes-shadow"
-include ":flork-model"
-include ":flork-controller-core"
-include ":flork-controller-ioc"
-include ":microservice"
-include ":json-schema-flattener"
+object Utils {
+    private val allowedKubernetesExtensions = setOf(
+            "x-kubernetes-int-or-string",
+            "x-kubernetes-preserve-unknown-fields",
+            "x-kubernetes-embedded-resource"
+    )
+
+    fun isValidAnyPropertyKey(key: String): Boolean {
+        return when {
+            key.startsWith("x-kubernetes-") -> allowedKubernetesExtensions.contains(key)
+            else -> true
+        }
+    }
+}

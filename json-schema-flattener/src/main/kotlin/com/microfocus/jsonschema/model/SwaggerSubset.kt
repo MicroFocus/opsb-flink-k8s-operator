@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-rootProject.name = "itom-flork"
+package com.microfocus.jsonschema.model
 
-include ":dummy-for-bundled-licenses"
-include ":flink-kubernetes-shadow"
-include ":flork-model"
-include ":flork-controller-core"
-include ":flork-controller-ioc"
-include ":microservice"
-include ":json-schema-flattener"
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class SwaggerSubset(
+        var definitions: MutableMap<String, SimplifiedJsonSchemaDefinition> = mutableMapOf()
+)

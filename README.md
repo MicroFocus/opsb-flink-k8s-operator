@@ -31,7 +31,7 @@ High availability of the controller(s) is supported and the default number of re
 ### Deployment
 
 The actual deployment is done by delegating to the classes from `flink-kubernetes`.
-However, they are shadowed in the [`flink-kubernetes-shadow`](flink-kubernetes-shadow/build.gradle)
+However, they are shadowed in the [`flink-kubernetes-shadow`](flink-kubernetes-shadow/build.gradle) module
 so that a different version of Fabric8's Kubernetes Client can be used for the controller.
 
 ### Validation
