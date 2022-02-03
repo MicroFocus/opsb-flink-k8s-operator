@@ -18,13 +18,12 @@ package com.itom.flork.kubernetes.api.v1.controllers;
 
 import com.itom.flork.kubernetes.api.v1.handlers.FlinkJobHandler;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Provider;
+import jakarta.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-import javax.inject.Singleton;
 
 // https://itnext.io/customresource-improvements-in-fabric8-kubernetesclient-v5-0-0-4aef4d299323
 @Named

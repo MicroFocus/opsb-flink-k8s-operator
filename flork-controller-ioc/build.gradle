@@ -23,10 +23,10 @@ plugins {
 dependencies {
     compileOnly "io.swagger:swagger-core:1.6.1" // must not be in implementation or it will conflict with Spring
 
-    api libraries.javaxInject
+    api libraries.injectApi
     api project(":flork-controller-core")
 
-    implementation libraries.javaxAnnotationApi
-    implementation libraries.javaxServletApi
+    implementation libraries.jakartaAnnotationApi
+    implementation libraries.jakartaServletApi
     implementation libraries.jaxRsApi
 }

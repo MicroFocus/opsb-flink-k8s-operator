@@ -16,9 +16,7 @@
 
 package com.itom.flork.spring.config;
 
-import com.itom.flork.kubernetes.api.v1.controllers.ConfigMapFlinkResourceController;
 import com.itom.flork.kubernetes.api.v1.controllers.WithoutCRD;
-import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.context.annotation.*;
 
 @Profile("!crd")
@@ -36,8 +34,5 @@ import org.springframework.context.annotation.*;
         }
 )
 @Import({WebSecurityConfig.class, KubernetesClientProvider.class})
-public class FlorkSpringConfigWithoutCRD extends ResourceConfig {
-    public FlorkSpringConfigWithoutCRD() {
-        this.register(ConfigMapFlinkResourceController.class);
-    }
+public class FlorkSpringConfigWithoutCRD {
 }

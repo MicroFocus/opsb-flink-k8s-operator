@@ -17,8 +17,6 @@
 package com.itom.flork.spring.config;
 
 import com.itom.flork.kubernetes.api.v1.controllers.WithoutCRD;
-import com.itom.flork.kubernetes.api.v1.controllers.webhooks.ValidatingWebhooksController;
-import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.context.annotation.*;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
@@ -40,8 +38,5 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
         }
 )
 @Import({WebSecurityConfig.class, KubernetesClientProvider.class})
-public class FlorkSpringConfig extends ResourceConfig {
-        public FlorkSpringConfig() {
-                this.register(ValidatingWebhooksController.class);
-        }
+public class FlorkSpringConfig {
 }

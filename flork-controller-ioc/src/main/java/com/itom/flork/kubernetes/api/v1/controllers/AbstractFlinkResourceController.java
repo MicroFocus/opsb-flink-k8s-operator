@@ -19,12 +19,12 @@ package com.itom.flork.kubernetes.api.v1.controllers;
 import com.itom.flork.kubernetes.api.v1.reconcilers.factories.FlinkJobReconcilerFactory;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.informers.SharedIndexInformer;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.util.HashMap;
 import java.util.Map;
 

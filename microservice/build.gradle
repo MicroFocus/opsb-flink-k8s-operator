@@ -25,7 +25,13 @@ plugins {
 mainClassName = "com.itom.flork.spring.FlorkSpringMain"
 
 ext {
-    springBootVersion = "2.6.3"
+    springBootVersion = "3.0.0-M1"
+}
+
+repositories {
+    maven {
+        url "https://repo.spring.io/milestone"
+    }
 }
 
 dependencies {
@@ -33,7 +39,7 @@ dependencies {
 
     implementation project(":flork-controller-ioc")
     implementation "org.glassfish.jaxb:jaxb-runtime:2.3.4"
-    implementation "org.springframework.boot:spring-boot-starter-jersey:$springBootVersion"
+    implementation "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
     implementation "org.springframework.boot:spring-boot-starter-security:$springBootVersion"
     implementation "ch.qos.logback:logback-core:$logbackVersion"
     implementation "ch.qos.logback:logback-classic:$logbackVersion"
