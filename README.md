@@ -4,6 +4,7 @@ Sample Kubernetes controller for Flink resources.
 The documentation here currently discusses only deployment with Custom Resource Definition (CRD).
 
 Note: the project can be opened in IntelliJ by opening the [root `build.gradle`](build.gradle) as a Project.
+It currently builds with Java 17 as configured [here](buildSrc/build.gradle) and [here](buildSrc/src/main/groovy/itom-java-plugin.gradle).
 
 ## CRD
 
