@@ -32,10 +32,10 @@ ext {
 
     dockerContextPath = "${buildDir.path}/docker/"
 
-    fabric8Version = "5.11.2"
+    fabric8Version = "5.12.1"
     embeddedFlinkVersion = "1.14.3"
     scalaVersion = "2.12"
-    jacksonVersion = "2.12.5"
+    jacksonVersion = "2.13.0"
 
     libraries = [
             javaxInject: "javax.inject:javax.inject:1",
