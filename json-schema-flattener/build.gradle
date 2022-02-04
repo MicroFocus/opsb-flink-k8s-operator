@@ -33,7 +33,7 @@ ext {
 }
 
 application {
-    mainClassName = "com.microfocus.jsonschema.JsonSchemaFlattener"
+    mainClass.set("com.microfocus.jsonschema.JsonSchemaFlattener")
 }
 
 version "0.0.1-SNAPSHOT"
