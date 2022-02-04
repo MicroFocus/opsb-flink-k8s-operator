@@ -22,7 +22,7 @@ spec:
   florkConf:
     shadowConfigFiles: false
   flinkConf:
-    kubernetes.container.image: "localhost:5000/apache/flink:1.14.3-scala_2.12-java8"
+    kubernetes.container.image: "localhost:5000/apache/flink:1.14.3-scala_2.12-java11"
     pipeline.jars: "local:///opt/flink/examples/batch/WordCount.jar"
     security.ssl.internal.enabled: false
     security.ssl.rest.enabled: false

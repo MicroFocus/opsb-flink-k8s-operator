@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-FROM openjdk:8-jre
+FROM openjdk:17.0.1-jdk-bullseye
 
 ARG BUILD_VERSION=latest
 ARG COMMIT_ID=HEAD
