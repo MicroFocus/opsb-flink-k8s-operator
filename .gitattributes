@@ -10,6 +10,7 @@ Dockerfile       text
 *.jar            binary
 *.jks            binary
 *.p12            binary
+*.pdf            binary
 gradlew          text eol=lf
 *.sh             text eol=lf
 *.bat            text eol=crlf
