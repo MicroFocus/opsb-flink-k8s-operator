@@ -35,7 +35,7 @@ ext {
     fabric8Version = "5.12.1"
     embeddedFlinkVersion = "1.14.3"
     scalaVersion = "2.12"
-    jacksonVersion = "2.13.0"
+    jacksonVersion = "2.13.1"
 
     libraries = [
             javaxInject: "javax.inject:javax.inject:1",
