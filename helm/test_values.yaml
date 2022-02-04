@@ -14,20 +14,6 @@
 # limitations under the License.
 #
 global:
-  cluster:
-    k8sProvider: cdf
-  nodeSelector:
-    foo: bar
-    baz: bak
-  externalAccessHost: flork.net
-  externalAccessPort: 443
-  persistence:
-    enabled: true
-    dbVolumeClaim: "db-claim"
-    dataVolumeClaim: "data-claim"
-    configVolumeClaim: "config-claim"
-    logVolumeClaim: "log-claim"
-  vaultAppRole: "default"
   docker:
     registry: artifactory.net:443
     orgName: itom
@@ -36,26 +22,3 @@ global:
   securityContext:
     user: "1999"
     fsGroup: "1999"
-  tlsTruststore: foo-bar-ts
-  vaultInit:
-    image: kubernetes-vault-init
-    imageTag: 0.8.0-004
-  vaultRenew:
-    image: kubernetes-vault-renew
-    imageTag: 0.8.0-004
-  # These are injected by other components in the composition chart, do NOT copy them to our default values.yaml
-  idm:
-    integrationUser: "integration_admin"
-    integrationUserKey: "idm_integration_admin_password"
-    serviceName: itom-idm-svc
-    tenant: "provider"
-    transportUser: "transport_admin"
-    transportUserKey: "idm_transport_admin_password"
-  prometheus:
-    prometheusSelector:
-      foo: bar
-      baz: bak
-deployment:
-  replicas: 1
-  rbac:
-    serviceAccount: foo-bar-sa

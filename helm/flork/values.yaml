@@ -16,7 +16,7 @@
 images:
   florkService:
     image: "itom-flork"
-    imageTag: "latest.4"
+    imageTag: "latest"
 
 global:
   docker: {}
