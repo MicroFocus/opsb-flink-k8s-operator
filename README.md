@@ -1,7 +1,8 @@
 # ITOM Flink Orchestrator for Kubernetes
 
-Sample Kubernetes controller for Flink resources.
-The documentation here currently discusses only deployment with Custom Resource Definition (CRD).
+Sample Kubernetes controller for [Flink](https://flink.apache.org/) resources.
+The documentation here currently only discusses deployment with Custom Resource Definition (CRD)
+targeting Flink's application mode with native Kubernetes integration.
 
 Note: the project can be opened in IntelliJ by opening the [root `build.gradle`](build.gradle) as a Project.
 It currently builds with Java 17 as configured [here](buildSrc/build.gradle) and [here](buildSrc/src/main/groovy/itom-java-plugin.gradle).
@@ -78,6 +79,10 @@ see `prepareConfFilesFromSpec` in [here](flork-controller-core/src/main/kotlin/c
 Before writing the corresponding files to (local, ephemeral) disk,
 the code will search for [decorators](flork-model/src/main/java/com/itom/flork/kubernetes/api/plugins) using Java's `ServiceLoader` features.
 Thus, a consumer could take a base container image and extend it with custom logic by simply adding jars with implementers of the decorator interfaces.
+
+The decorators get an instance of [`florkConf`](flork-model/src/main/java/com/itom/flork/kubernetes/api/v1/model/FlorkConf.java) which,
+since the CRD specifies `x-kubernetes-preserve-unknown-fields: true` for it,
+may contain custom properties and/or nested objects.
 
 ## Inversion of control and dependency injection
 
