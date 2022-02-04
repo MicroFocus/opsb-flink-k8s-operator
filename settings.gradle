@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-rootProject.name = "itom-flork"
+rootProject.name = "opsb-flink-k8s-operator"
 
 include ":dummy-for-bundled-licenses"
 include ":flink-kubernetes-shadow"
