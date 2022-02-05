@@ -36,6 +36,14 @@ The actual deployment is done by delegating to the classes from `flink-kubernete
 However, they are shadowed in the [`flink-kubernetes-shadow`](flink-kubernetes-shadow/build.gradle) module
 so that a different version of Fabric8's Kubernetes Client can be used for the controller.
 
+Note that the controller tries to communicate with Flink's job manager with the official client
+(to stop/cancel or fetch job status),
+and it assumes that, if TLS is enabled for REST communication in the Flink cluster,
+the controller gets Flink's CA certificate injected in a trust store,
+and Flink will trust the controller's certificate if needed;
+see `getDescriptorWithTlsIfNeeded` in [`FlorkUtils`](flork-controller-core/src/main/kotlin/com/itom/flork/kubernetes/api/utils/FlorkUtils.kt)
+and [this sample script](microservice/src/main/container-resources/flork/bin/tls-stores-setup.sh).
+
 ### Validation
 
 A class for resource validation is [available](flork-controller-core/src/main/java/com/itom/flork/kubernetes/api/v1/validators/FlinkJobValidator.java).
