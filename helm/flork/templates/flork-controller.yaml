@@ -81,10 +81,6 @@ spec:
           mountPath: /opt/flork/tls/trustedCAs
         - name: tmp-storage
           mountPath: /tmp
-        - name: log-storage
-          mountPath: /service/log
-        - name: conf-storage
-          mountPath: /service/conf
       {{- with (coalesce $.Values.nodeSelector $.Values.global.nodeSelector) }}
       nodeSelector: {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -101,12 +97,6 @@ spec:
         configMap:
           name: {{ $tenant.id }}-trusted-certs
       - name: tmp-storage
-        emptyDir:
-          medium: Memory
-      - name: log-storage
-        emptyDir:
-          medium: Memory
-      - name: conf-storage
         emptyDir:
           medium: Memory
 {{- end }}
