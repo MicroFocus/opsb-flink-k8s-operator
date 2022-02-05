@@ -82,6 +82,7 @@ gradle-app.setting
 ### Intellij ###
 .idea/*
 !.idea/scopes
+!.idea/copyright
 .iml
 out/
 
