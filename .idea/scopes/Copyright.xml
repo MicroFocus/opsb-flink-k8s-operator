@@ -1,3 +1,3 @@
 <component name="DependencyValidationManager">
-  <scope name="Copyright" pattern="(file:*.java||file:*.kt||file:*.groovy||file:*.gradle||file:*.yaml||file:*.sh||file:*.git*||file:docker/Dockerfile||file[flork-spring-service.microservice.main]:resources/META-INF/services/*)&amp;&amp;!file[flork-spring-service]:helm/flork/schemas/*&amp;&amp;!file[flork-spring-service.buildSrc.main]:*.java&amp;&amp;!file[flork-spring-service.microservice.main]:container-resources/flork/static/api/*" />
+  <scope name="Copyright" pattern="(file:*.java||file:*.kt||file:*.groovy||file:*.gradle||file:*.yaml||file:*.sh||file:*.git*||file:docker/Dockerfile||file[opsb-flink-k8s-operator.microservice.main]:resources/META-INF/services/*)&amp;&amp;!file[opsb-flink-k8s-operator]:helm/flork/schemas/*&amp;&amp;!file[opsb-flink-k8s-operator.buildSrc.main]:*.java&amp;&amp;!file[opsb-flink-k8s-operator.microservice.main]:container-resources/flork/static/api/*" />
 </component>
