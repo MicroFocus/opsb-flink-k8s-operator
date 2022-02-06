@@ -22,10 +22,12 @@ plugins {
     id "license-report-plugin"
 }
 
-mainClassName = "com.itom.flork.spring.FlorkSpringMain"
-
 ext {
     springBootVersion = "2.6.3"
+}
+
+application {
+    mainClass.set("com.itom.flork.spring.FlorkSpringMain")
 }
 
 dependencies {
