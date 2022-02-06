@@ -6,11 +6,18 @@ targeting Flink's application mode with native Kubernetes integration.
 
 Note: the project can be opened in IntelliJ by opening the [root `build.gradle`](build.gradle) as a Project.
 It currently builds with Java 17 as configured [here](buildSrc/build.gradle) and [here](buildSrc/src/main/groovy/itom-java-plugin.gradle).
+For a basic build simply run:
+
+```
+./gradlew build
+```
 
 ## CRD
 
 The YAML template is [here](helm/flork/templates/flink-job-crd.yaml),
 with the corresponding POJO [here](flork-model/src/main/java/com/itom/flork/kubernetes/api/v1/model/FlinkJobCustomResource.java).
+Note that the embedded Kubernetes resources use the schema from the official OpenAPI spec,
+see also the [flattening helper](json-schema-flattener).
 
 Note that the CRD is *not* in the special `crds` Helm folder.
 The chart with the controller must be installed before any consumers of the CRD,
@@ -150,3 +157,7 @@ the local registry is accessible at `localhost:5000`.
 
 - Ingress.
 - [Java Operator SDK](https://javaoperatorsdk.io/).
+
+## Contributing
+
+See [here](.github/CONTRIBUTING.md).
