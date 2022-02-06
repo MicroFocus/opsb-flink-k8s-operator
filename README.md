@@ -96,7 +96,8 @@ may contain custom properties and/or nested objects.
 
 Some helper classes for IoC are included in the `flork-controller-ioc` module.
 For example, the REST controller for validation endpoints can be found
-[here](flork-controller-ioc/src/main/java/com/itom/flork/kubernetes/api/v1/controllers/webhooks/ValidatingWebhooksController.java).
+[here](flork-controller-ioc/src/main/java/com/itom/flork/kubernetes/api/v1/controllers/webhooks/ValidatingWebhooksController.java),
+and the Kubernetes controller [here](flork-controller-ioc/src/main/java/com/itom/flork/kubernetes/api/v1/controllers/FlinkResourceController.java).
 
 ### Spring Boot
 
