@@ -16,14 +16,15 @@
 
 package com.microfocus.flork.kubernetes.api.v1.reconcilers.factories
 
+import com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource
 import com.microfocus.flork.kubernetes.api.v1.reconcilers.CoroutineFlinkJobReconciler
 import com.microfocus.flork.kubernetes.api.v1.reconcilers.FlinkJobReconciler
 import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.informers.cache.Lister
 import java.util.concurrent.atomic.AtomicReference
 
-class CoroutineFlinkJobReconcilerFactoryWithoutCRD : com.microfocus.flork.kubernetes.api.v1.reconcilers.factories.FlinkJobReconcilerFactory() {
-    override fun create(k8sClient: KubernetesClient, lister: AtomicReference<Lister<com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource>?>): FlinkJobReconciler {
+class CoroutineFlinkJobReconcilerFactoryWithoutCRD : FlinkJobReconcilerFactory() {
+    override fun create(k8sClient: KubernetesClient, lister: AtomicReference<Lister<FlinkJobCustomResource>?>): FlinkJobReconciler {
         return CoroutineFlinkJobReconciler(k8sClient, lister, false)
     }
 

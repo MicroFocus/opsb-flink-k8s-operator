@@ -16,6 +16,7 @@
 
 package com.microfocus.flork.kubernetes.api.utils
 
+import com.microfocus.flork.kubernetes.api.constants.RuntimeConstants
 import io.fabric8.kubernetes.api.model.Container
 import io.fabric8.kubernetes.api.model.EnvVar
 import io.fabric8.kubernetes.api.model.PodSpec
@@ -61,7 +62,7 @@ object FlorkUtils {
             LOG.debug("Trying to also use client certificates for REST communication with '{}'.", jobKey)
         }
 
-        baseConfig.set(SecurityOptions.SSL_ALGORITHMS, com.microfocus.flork.kubernetes.api.constants.RuntimeConstants.SSL_ALGORITHMS)
+        baseConfig.set(SecurityOptions.SSL_ALGORITHMS, RuntimeConstants.SSL_ALGORITHMS)
         // trust store settings must not be null at this point
         baseConfig.set(SecurityOptions.SSL_REST_TRUSTSTORE, System.getenv("CLIENT_TRUSTSTORE"))
         baseConfig.set(SecurityOptions.SSL_REST_TRUSTSTORE_PASSWORD, System.getenv("TRUSTSTORE_PASSWORD"))

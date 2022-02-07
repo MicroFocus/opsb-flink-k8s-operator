@@ -16,6 +16,7 @@
 
 package com.microfocus.flork.kubernetes.api.v1.reconcilers
 
+import com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource
 import com.microfocus.flork.kubernetes.api.v1.reconcilers.phasers.CoroutineFlinkJobPhaserWithoutCRD
 import com.microfocus.flork.kubernetes.api.v1.reconcilers.phasers.CoroutineFlinkJobReconcilerPhaser
 import io.fabric8.kubernetes.api.model.DeletionPropagation
@@ -32,7 +33,7 @@ import java.util.concurrent.atomic.AtomicReference
 
 class CoroutineFlinkJobReconciler(
     private val k8sClient: KubernetesClient,
-    private val lister: AtomicReference<Lister<com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource>?>,
+    private val lister: AtomicReference<Lister<FlinkJobCustomResource>?>,
     private val crdBased: Boolean
 ) : FlinkJobReconciler {
     companion object {
@@ -52,7 +53,7 @@ class CoroutineFlinkJobReconciler(
             RECONCILER_STATES.clear()
         }
 
-        fun maybeCleanHighAvailability(k8sClient: KubernetesClient, flinkJob: com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource, key: String?) {
+        fun maybeCleanHighAvailability(k8sClient: KubernetesClient, flinkJob: FlinkJobCustomResource, key: String?) {
             if (flinkJob.spec.flinkConf?.containsKey(HighAvailabilityOptions.HA_MODE.key()) == true && flinkJob.spec.florkConf?.cleanHighAvailability == true) {
                 LOG.info("Cleaning HA config maps for '{}'.", key)
                 val labels = mapOf(
@@ -75,7 +76,7 @@ class CoroutineFlinkJobReconciler(
         }
     }
 
-    override fun reconcile(flinkJob: com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource) {
+    override fun reconcile(flinkJob: FlinkJobCustomResource) {
         COROUTINE_SCOPE.get().launch {
             val key = Cache.metaNamespaceKeyFunc(flinkJob)
             val phaserCandidate = if (crdBased) {
@@ -104,7 +105,7 @@ class CoroutineFlinkJobReconciler(
         }
     }
 
-    override fun delete(flinkJob: com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource) {
+    override fun delete(flinkJob: FlinkJobCustomResource) {
         val key = Cache.metaNamespaceKeyFunc(flinkJob)
         RECONCILER_STATES.remove(key)?.cancel()
 

@@ -19,6 +19,12 @@ package com.microfocus.flork.kubernetes.api.utils
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator
+import com.microfocus.flork.kubernetes.api.constants.FlorkConstants
+import com.microfocus.flork.kubernetes.api.plugins.FlinkConfDecorator
+import com.microfocus.flork.kubernetes.api.plugins.PodSpecDecorator
+import com.microfocus.flork.kubernetes.api.plugins.PodSpecType
+import com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource
+import com.microfocus.flork.kubernetes.api.v1.model.FlorkConf
 import io.fabric8.kubernetes.api.model.HasMetadata
 import io.fabric8.kubernetes.api.model.ObjectMeta
 import io.fabric8.kubernetes.api.model.Pod
@@ -70,16 +76,16 @@ object FlinkConfUtils {
 
     const val FLINK_CONF_DIR_KEY = "kubernetes.flink.conf.dir"
     
-    suspend fun prepareConfFilesFromSpec(flinkJob: com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource, confPath: Path) = withContext(Dispatchers.IO) {
+    suspend fun prepareConfFilesFromSpec(flinkJob: FlinkJobCustomResource, confPath: Path) = withContext(Dispatchers.IO) {
         runInterruptible {
             val jobManagerPodMeta = flinkJob.spec.jobManagerPodMeta ?: ObjectMeta()
             val jobManagerPodSpec = flinkJob.spec.jobManagerPodSpec ?: PodSpec()
             val taskManagerPodSpec = flinkJob.spec.taskManagerPodSpec ?: SerializationUtils.clone(jobManagerPodSpec)
 
             val desiredFlinkConfPath = writeConfYamlTo(flinkJob, confPath)
-            val podSpecDecorators = ServiceLoader.load(com.microfocus.flork.kubernetes.api.plugins.PodSpecDecorator::class.java).sortedBy { it.priority() }
+            val podSpecDecorators = ServiceLoader.load(PodSpecDecorator::class.java).sortedBy { it.priority() }
 
-            Files.newOutputStream(confPath.resolve(templateFileName(com.microfocus.flork.kubernetes.api.plugins.PodSpecType.JOB_MANAGER))).use { os ->
+            Files.newOutputStream(confPath.resolve(templateFileName(PodSpecType.JOB_MANAGER))).use { os ->
                 var podSpec = jobManagerPodSpec
                 for (decorator in podSpecDecorators) {
                     LOG.debug("Decorating job manager's pod spec with {}.", decorator)
@@ -87,7 +93,7 @@ object FlinkConfUtils {
                 }
                 val pod = getFlinkPodTemplate(flinkJob, podSpec, desiredFlinkConfPath).apply {
                     val annotations = jobManagerPodMeta.annotations ?: mutableMapOf()
-                    annotations["${com.microfocus.flork.kubernetes.api.constants.FlorkConstants.CRD_GROUP}/epoch"] = System.currentTimeMillis().toString()
+                    annotations["${FlorkConstants.CRD_GROUP}/epoch"] = System.currentTimeMillis().toString()
 
                     metadata.annotations = annotations
                     metadata.labels = jobManagerPodMeta.labels
@@ -96,7 +102,7 @@ object FlinkConfUtils {
                 MAPPER.writeValue(os, pod)
             }
 
-            Files.newOutputStream(confPath.resolve(templateFileName(com.microfocus.flork.kubernetes.api.plugins.PodSpecType.TASK_MANAGER))).use { os ->
+            Files.newOutputStream(confPath.resolve(templateFileName(PodSpecType.TASK_MANAGER))).use { os ->
                 var podSpec = taskManagerPodSpec
                 for (decorator in podSpecDecorators) {
                     LOG.debug("Decorating task manager's pod spec with {}.", decorator)
@@ -113,13 +119,13 @@ object FlinkConfUtils {
     }
 
     @JvmStatic
-    fun writeConfYamlTo(flinkJob: com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource, confPath: Path): String {
+    fun writeConfYamlTo(flinkJob: FlinkJobCustomResource, confPath: Path): String {
         val desiredFlinkConfPath: String
         Files.newOutputStream(confPath.resolve(GlobalConfiguration.FLINK_CONF_FILENAME)).use { os ->
             val flinkConf = decorateConsideringMetadata(flinkJob.spec.flinkConf, confPath.toString(), flinkJob, flinkJob.spec.florkConf)
             desiredFlinkConfPath = flinkConf.getOrDefault(FLINK_CONF_DIR_KEY, "/opt/flink/conf").toString()
             if (flinkJob.spec.florkConf.shadowConfigFiles) {
-                flinkConf[FLINK_CONF_DIR_KEY] = com.microfocus.flork.kubernetes.api.constants.FlorkConstants.FLORK_CONF_DIR
+                flinkConf[FLINK_CONF_DIR_KEY] = FlorkConstants.FLORK_CONF_DIR
             }
             LOG.trace("Writing {} with: {}", GlobalConfiguration.FLINK_CONF_FILENAME, flinkConf)
             MAPPER.writeValue(os, flinkConf)
@@ -128,7 +134,7 @@ object FlinkConfUtils {
     }
 
     @JvmStatic
-    private fun decorateConsideringMetadata(map: MutableMap<String, Any>?, confDir: String, resource: HasMetadata, florkConf: com.microfocus.flork.kubernetes.api.v1.model.FlorkConf): MutableMap<String, Any> {
+    private fun decorateConsideringMetadata(map: MutableMap<String, Any>?, confDir: String, resource: HasMetadata, florkConf: FlorkConf): MutableMap<String, Any> {
         var decorated = when (map) {
             null -> {
                 mutableMapOf()
@@ -141,7 +147,7 @@ object FlinkConfUtils {
             }
         }
 
-        for (decorator in ServiceLoader.load(com.microfocus.flork.kubernetes.api.plugins.FlinkConfDecorator::class.java).sortedBy { it.priority() }) {
+        for (decorator in ServiceLoader.load(FlinkConfDecorator::class.java).sortedBy { it.priority() }) {
             LOG.debug("Decorating Flink conf with {}.", decorator)
             decorated = decorator.decorate(decorated, florkConf)
         }
@@ -158,9 +164,9 @@ object FlinkConfUtils {
         setKeyWarningIfAlreadyPresent(decorated, KubernetesConfigOptions.CLUSTER_ID.key(), resource.metadata?.name!!, resource)
 
         setKeyWarningIfAlreadyPresent(decorated, "kubernetes.pod-template-file.jobmanager",
-                "$confDir/${templateFileName(com.microfocus.flork.kubernetes.api.plugins.PodSpecType.JOB_MANAGER)}", resource)
+                "$confDir/${templateFileName(PodSpecType.JOB_MANAGER)}", resource)
         setKeyWarningIfAlreadyPresent(decorated, "kubernetes.pod-template-file.taskmanager",
-                "$confDir/${templateFileName(com.microfocus.flork.kubernetes.api.plugins.PodSpecType.TASK_MANAGER)}", resource)
+                "$confDir/${templateFileName(PodSpecType.TASK_MANAGER)}", resource)
 
         setKeyWarningIfAlreadyPresent(decorated, DeploymentOptionsInternal.CONF_DIR.key(), confDir, resource)
 
@@ -176,11 +182,11 @@ object FlinkConfUtils {
     }
 
     @JvmStatic
-    private fun templateFileName(type: com.microfocus.flork.kubernetes.api.plugins.PodSpecType): String {
-        return "${type.name.lowercase()}_${com.microfocus.flork.kubernetes.api.constants.FlorkConstants.POD_TEMPLATE_FILE_SUFFIX}"
+    private fun templateFileName(type: PodSpecType): String {
+        return "${type.name.lowercase()}_${FlorkConstants.POD_TEMPLATE_FILE_SUFFIX}"
     }
 
-    private fun getFlinkPodTemplate(flinkJob: com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource, podSpec: PodSpec, desiredFlinkConfPath: String): Pod {
+    private fun getFlinkPodTemplate(flinkJob: FlinkJobCustomResource, podSpec: PodSpec, desiredFlinkConfPath: String): Pod {
         if (flinkJob.spec.florkConf.shadowConfigFiles) {
             FlorkUtils.injectDesiredFlinkConfPathAsEnvVar(podSpec, desiredFlinkConfPath)
         }
@@ -199,8 +205,8 @@ object FlinkConfUtils {
             if (map.remove(GlobalConfiguration.FLINK_CONF_FILENAME) != null) {
                 LOG.warn("Job '{}' had {} in additionalConfFiles, which is not allowed. Ignoring.", jobKey, GlobalConfiguration.FLINK_CONF_FILENAME)
             }
-            if (map.remove(com.microfocus.flork.kubernetes.api.constants.FlorkConstants.POD_TEMPLATE_FILE_SUFFIX) != null) {
-                LOG.warn("Job '{}' had {} in additionalConfFiles, which is not allowed. Ignoring.", jobKey, com.microfocus.flork.kubernetes.api.constants.FlorkConstants.POD_TEMPLATE_FILE_SUFFIX)
+            if (map.remove(FlorkConstants.POD_TEMPLATE_FILE_SUFFIX) != null) {
+                LOG.warn("Job '{}' had {} in additionalConfFiles, which is not allowed. Ignoring.", jobKey, FlorkConstants.POD_TEMPLATE_FILE_SUFFIX)
             }
 
             for (entry in map) {

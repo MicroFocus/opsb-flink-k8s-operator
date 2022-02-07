@@ -16,8 +16,10 @@
 
 package com.microfocus.flork.kubernetes.api.v1.reconcilers
 
-interface FlinkJobReconciler {
-    fun reconcile(flinkJob: com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource)
+import com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource
 
-    fun delete(flinkJob: com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource)
+interface FlinkJobReconciler {
+    fun reconcile(flinkJob: FlinkJobCustomResource)
+
+    fun delete(flinkJob: FlinkJobCustomResource)
 }

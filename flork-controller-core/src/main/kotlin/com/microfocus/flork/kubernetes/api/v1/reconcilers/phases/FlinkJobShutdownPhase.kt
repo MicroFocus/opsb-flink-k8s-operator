@@ -16,8 +16,10 @@
 
 package com.microfocus.flork.kubernetes.api.v1.reconcilers.phases
 
+import com.microfocus.flork.kubernetes.api.utils.FlinkApplicationClusterDeployer
 import com.microfocus.flork.kubernetes.api.utils.FlinkConfUtils
 import com.microfocus.flork.kubernetes.api.utils.FlorkUtils
+import com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource
 import com.microfocus.flork.kubernetes.api.v1.model.FlorkPhase
 import io.fabric8.kubernetes.api.model.DeletionPropagation
 import io.fabric8.kubernetes.client.KubernetesClient
@@ -32,7 +34,7 @@ import kotlin.io.path.createTempDirectory
 class FlinkJobShutdownPhase(
         private val k8sClient: KubernetesClient,
         private val jobKey: String,
-        private val flinkJob: com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource
+        private val flinkJob: FlinkJobCustomResource
 ) {
     companion object {
         private val LOG = LoggerFactory.getLogger(FlinkJobShutdownPhase::class.java)
@@ -85,7 +87,7 @@ class FlinkJobShutdownPhase(
             LOG.info("No savepoint directory configured for '{}'.")
         }
 
-        val factory = com.microfocus.flork.kubernetes.api.utils.FlinkApplicationClusterDeployer.getClusterClientFactory(flinkConfig)
+        val factory = FlinkApplicationClusterDeployer.getClusterClientFactory(flinkConfig)
         val flinkClusterDescriptor = FlorkUtils.getDescriptorWithTlsIfNeeded(jobKey, factory, flinkConfig,
                 flinkJob.spec.florkConf?.preferClusterInternalService ?: true)
 

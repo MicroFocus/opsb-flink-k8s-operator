@@ -16,6 +16,7 @@
 
 package com.microfocus.flork.kubernetes.api.v1.reconcilers.phasers
 
+import com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource
 import io.fabric8.kubernetes.api.model.coordination.v1.Lease
 import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.informers.cache.Cache
@@ -29,8 +30,8 @@ import java.util.concurrent.atomic.AtomicReference
 class CoroutineFlinkJobReconcilerPhaserTest {
     companion object {
         private val KUBERNETES_SERVER = KubernetesServer(true, true)
-        private val CACHE = Cache<com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource>()
-        private val LISTER: AtomicReference<Lister<com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource>?> = AtomicReference(Lister(CACHE))
+        private val CACHE = Cache<FlinkJobCustomResource>()
+        private val LISTER: AtomicReference<Lister<FlinkJobCustomResource>?> = AtomicReference(Lister(CACHE))
 
         private const val KEY = "flork/foo"
 
@@ -49,7 +50,7 @@ class CoroutineFlinkJobReconcilerPhaserTest {
 
     @BeforeEach
     fun purgeCache() {
-        CACHE.remove(com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource().apply {
+        CACHE.remove(FlinkJobCustomResource().apply {
             metadata.apply {
                 namespace = "flork"
                 name = "foo"

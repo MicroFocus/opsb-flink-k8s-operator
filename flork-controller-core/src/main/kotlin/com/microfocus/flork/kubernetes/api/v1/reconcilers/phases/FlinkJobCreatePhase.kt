@@ -16,8 +16,10 @@
 
 package com.microfocus.flork.kubernetes.api.v1.reconcilers.phases
 
+import com.microfocus.flork.kubernetes.api.utils.FlinkApplicationClusterDeployer
 import com.microfocus.flork.kubernetes.api.utils.FlinkConfUtils
 import com.microfocus.flork.kubernetes.api.utils.FlorkUtils
+import com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource
 import com.microfocus.flork.kubernetes.api.v1.model.FlorkPhase
 import com.microfocus.flork.kubernetes.api.v1.reconcilers.utils.FlinkResourceDeploymentMonitor
 import com.microfocus.flork.kubernetes.api.v1.reconcilers.utils.FlinkResourceOperations
@@ -41,8 +43,8 @@ import kotlin.io.path.createTempDirectory
 class FlinkJobCreatePhase(
     private val jobKey: String,
     private val deploymentMonitor: FlinkResourceDeploymentMonitor,
-    private val flinkJob: com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource,
-    private val crOperations: FlinkResourceOperations<*, *, com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource>,
+    private val flinkJob: FlinkJobCustomResource,
+    private val crOperations: FlinkResourceOperations<*, *, FlinkJobCustomResource>,
     private val setAsDeployedCoroutine: AtomicReference<Job?>
 ) {
     companion object {
@@ -83,7 +85,7 @@ class FlinkJobCreatePhase(
 
         val backgroundCoroutine = backgroundTaskScope.launch {
             supervisorScope {
-                val factory = com.microfocus.flork.kubernetes.api.utils.FlinkApplicationClusterDeployer.getClusterClientFactory(flinkConfig)
+                val factory = FlinkApplicationClusterDeployer.getClusterClientFactory(flinkConfig)
                 val flinkClusterDescriptor = FlorkUtils.getDescriptorWithTlsIfNeeded(jobKey, factory, flinkConfig,
                         flinkJob.spec.florkConf?.preferClusterInternalService ?: true)
                 flinkClusterDescriptor.use { descriptor ->
@@ -103,7 +105,7 @@ class FlinkJobCreatePhase(
             try {
                 supervisorScope {
                     runInterruptible {
-                        com.microfocus.flork.kubernetes.api.utils.FlinkApplicationClusterDeployer.deployWithConfigFile(flinkConfig, flinkJob.spec.jobClassName,
+                        FlinkApplicationClusterDeployer.deployWithConfigFile(flinkConfig, flinkJob.spec.jobClassName,
                                 flinkJob.spec.jobArgs ?: arrayOf())
                     }
                 }
@@ -129,7 +131,7 @@ class FlinkJobCreatePhase(
         }
     }
 
-    private suspend fun checkIfDeploymentActuallyFailed(flinkJob: com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource, restTls: Boolean, e: Exception) = coroutineScope {
+    private suspend fun checkIfDeploymentActuallyFailed(flinkJob: FlinkJobCustomResource, restTls: Boolean, e: Exception) = coroutineScope {
         if (e !is InterruptedException && deploymentMonitor.addedFlag.get()) {
             if (restTls) {
                 var ex: Throwable = e
@@ -157,7 +159,7 @@ class FlinkJobCreatePhase(
         throw e
     }
     
-    private suspend fun waitForRunningJob(flinkJob: com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource, flinkClient: ClusterClient<String>) = coroutineScope {
+    private suspend fun waitForRunningJob(flinkJob: FlinkJobCustomResource, flinkClient: ClusterClient<String>) = coroutineScope {
         while (true) {
             try {
                 val jobs = flinkClient.listJobs().await()
@@ -195,7 +197,7 @@ class FlinkJobCreatePhase(
         }
     }
 
-    private suspend fun patchStatus(flinkJob: com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource): com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource = coroutineScope {
+    private suspend fun patchStatus(flinkJob: FlinkJobCustomResource): FlinkJobCustomResource = coroutineScope {
         flinkJob.status.generationDuringLastTransition = observedGeneration
         crOperations.patchStatus(flinkJob)
     }

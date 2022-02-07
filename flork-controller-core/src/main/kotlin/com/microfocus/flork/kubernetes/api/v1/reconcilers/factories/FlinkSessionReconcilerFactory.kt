@@ -16,13 +16,14 @@
 
 package com.microfocus.flork.kubernetes.api.v1.reconcilers.factories
 
+import com.microfocus.flork.kubernetes.api.v1.model.FlinkSessionCustomResource
 import com.microfocus.flork.kubernetes.api.v1.reconcilers.FlinkSessionReconciler
 import io.fabric8.kubernetes.client.KubernetesClient
 import io.fabric8.kubernetes.client.informers.cache.Lister
 import java.util.concurrent.atomic.AtomicReference
 
 interface FlinkSessionReconcilerFactory {
-    fun create(k8sClient: KubernetesClient, lister: AtomicReference<Lister<com.microfocus.flork.kubernetes.api.v1.model.FlinkSessionCustomResource>?>): FlinkSessionReconciler
+    fun create(k8sClient: KubernetesClient, lister: AtomicReference<Lister<FlinkSessionCustomResource>?>): FlinkSessionReconciler
 
     fun stopAll()
 }

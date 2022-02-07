@@ -16,6 +16,7 @@
 
 package com.microfocus.flork.kubernetes.api.v1.reconcilers.phasers
 
+import com.microfocus.flork.kubernetes.api.v1.model.FlinkSessionCustomResource
 import com.microfocus.flork.kubernetes.api.v1.model.FlinkSessionSpec
 import com.microfocus.flork.kubernetes.api.v1.model.FlinkSessionStatus
 import com.microfocus.flork.kubernetes.api.v1.model.FlorkPhase
@@ -29,13 +30,13 @@ import java.util.concurrent.atomic.AtomicReference
 class CoroutineFlinkSessionReconcilerPhaser internal constructor(
     coroutineScope: CoroutineScope,
     k8sClient: KubernetesClient,
-    lister: AtomicReference<Lister<com.microfocus.flork.kubernetes.api.v1.model.FlinkSessionCustomResource>?>,
+    lister: AtomicReference<Lister<FlinkSessionCustomResource>?>,
     jobKey: String,
     leaseDurationSeconds: Long
-) : AbstractReconcilerPhaser<FlinkSessionSpec, FlinkSessionStatus, com.microfocus.flork.kubernetes.api.v1.model.FlinkSessionCustomResource>(
+) : AbstractReconcilerPhaser<FlinkSessionSpec, FlinkSessionStatus, FlinkSessionCustomResource>(
         coroutineScope,
         k8sClient,
-        com.microfocus.flork.kubernetes.api.v1.model.FlinkSessionCustomResource::class.java,
+        FlinkSessionCustomResource::class.java,
         lister,
         jobKey,
         leaseDurationSeconds
@@ -47,11 +48,11 @@ class CoroutineFlinkSessionReconcilerPhaser internal constructor(
     constructor(
         coroutineScope: CoroutineScope,
         k8sClient: KubernetesClient,
-        lister: AtomicReference<Lister<com.microfocus.flork.kubernetes.api.v1.model.FlinkSessionCustomResource>?>,
+        lister: AtomicReference<Lister<FlinkSessionCustomResource>?>,
         jobKey: String
     ) : this(coroutineScope, k8sClient, lister, jobKey, LEASE_DURATION_SECONDS)
 
-    fun wasGenerationObserved(flinkSession: com.microfocus.flork.kubernetes.api.v1.model.FlinkSessionCustomResource): Boolean {
+    fun wasGenerationObserved(flinkSession: FlinkSessionCustomResource): Boolean {
         return flinkSession.metadata.generation == observedGeneration && flinkSession.metadata.generation == flinkSession.status.generationDuringLastTransition
     }
 
@@ -67,7 +68,7 @@ class CoroutineFlinkSessionReconcilerPhaser internal constructor(
         }
     }
 
-    private suspend fun reconcileIfLeading(flinkSession: com.microfocus.flork.kubernetes.api.v1.model.FlinkSessionCustomResource): Unit = coroutineScope {
+    private suspend fun reconcileIfLeading(flinkSession: FlinkSessionCustomResource): Unit = coroutineScope {
         if (leading.get()) {
             val job = launch { reconcile(flinkSession) }
             // previous job should be automatically cancelled by flow (collectLatest),
@@ -81,7 +82,7 @@ class CoroutineFlinkSessionReconcilerPhaser internal constructor(
         }
     }
 
-    private suspend fun reconcile(flinkSession: com.microfocus.flork.kubernetes.api.v1.model.FlinkSessionCustomResource): Unit = coroutineScope {
+    private suspend fun reconcile(flinkSession: FlinkSessionCustomResource): Unit = coroutineScope {
         when (flinkSession.status.florkPhase) {
             FlorkPhase.CREATED -> {
                 executeCreationPhase(flinkSession)
@@ -115,14 +116,14 @@ class CoroutineFlinkSessionReconcilerPhaser internal constructor(
         }
     }
 
-    private suspend fun executeCreationPhase(flinkSession: com.microfocus.flork.kubernetes.api.v1.model.FlinkSessionCustomResource) = coroutineScope {
+    private suspend fun executeCreationPhase(flinkSession: FlinkSessionCustomResource) = coroutineScope {
     }
 
-    private suspend fun executeShutdownPhase(flinkSession: com.microfocus.flork.kubernetes.api.v1.model.FlinkSessionCustomResource) = coroutineScope {
+    private suspend fun executeShutdownPhase(flinkSession: FlinkSessionCustomResource) = coroutineScope {
     }
 
     // generation doesn't change with metadata or status updates
-    private suspend fun patchStatus(flinkSession: com.microfocus.flork.kubernetes.api.v1.model.FlinkSessionCustomResource, updateGeneration: Boolean = true): com.microfocus.flork.kubernetes.api.v1.model.FlinkSessionCustomResource = coroutineScope {
+    private suspend fun patchStatus(flinkSession: FlinkSessionCustomResource, updateGeneration: Boolean = true): FlinkSessionCustomResource = coroutineScope {
         if (updateGeneration) {
             flinkSession.status.generationDuringLastTransition = observedGeneration
         }

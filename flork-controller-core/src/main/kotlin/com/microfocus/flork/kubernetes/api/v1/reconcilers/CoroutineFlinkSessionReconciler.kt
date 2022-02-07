@@ -16,6 +16,7 @@
 
 package com.microfocus.flork.kubernetes.api.v1.reconcilers
 
+import com.microfocus.flork.kubernetes.api.v1.model.FlinkSessionCustomResource
 import com.microfocus.flork.kubernetes.api.v1.reconcilers.phasers.CoroutineFlinkSessionReconcilerPhaser
 import io.fabric8.kubernetes.api.model.DeletionPropagation
 import io.fabric8.kubernetes.client.KubernetesClient
@@ -28,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentMap
 import java.util.concurrent.atomic.AtomicReference
 
-class CoroutineFlinkSessionReconciler(private val k8sClient: KubernetesClient, private val lister: AtomicReference<Lister<com.microfocus.flork.kubernetes.api.v1.model.FlinkSessionCustomResource>?>) : FlinkSessionReconciler {
+class CoroutineFlinkSessionReconciler(private val k8sClient: KubernetesClient, private val lister: AtomicReference<Lister<FlinkSessionCustomResource>?>) : FlinkSessionReconciler {
     companion object {
         private val LOG: Logger = LoggerFactory.getLogger(CoroutineFlinkSessionReconciler::class.java)
 
@@ -47,7 +48,7 @@ class CoroutineFlinkSessionReconciler(private val k8sClient: KubernetesClient, p
         }
     }
 
-    override fun reconcile(flinkSession: com.microfocus.flork.kubernetes.api.v1.model.FlinkSessionCustomResource) {
+    override fun reconcile(flinkSession: FlinkSessionCustomResource) {
         COROUTINE_SCOPE.get().launch {
             val key = Cache.metaNamespaceKeyFunc(flinkSession)
             val state = RECONCILER_STATES.merge(key, CoroutineFlinkSessionReconcilerPhaser(this, k8sClient, lister, key)) { old, new ->
@@ -71,7 +72,7 @@ class CoroutineFlinkSessionReconciler(private val k8sClient: KubernetesClient, p
         }
     }
 
-    override fun delete(flinkSession: com.microfocus.flork.kubernetes.api.v1.model.FlinkSessionCustomResource) {
+    override fun delete(flinkSession: FlinkSessionCustomResource) {
         val key = Cache.metaNamespaceKeyFunc(flinkSession)
         RECONCILER_STATES.remove(key)?.cancel()
         k8sClient.apps().deployments()

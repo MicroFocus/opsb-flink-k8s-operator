@@ -16,8 +16,7 @@
 
 package com.microfocus.flork.kubernetes.api.v1.reconcilers.phasers
 
-import com.microfocus.flork.kubernetes.api.v1.model.DeletionPolicy
-import com.microfocus.flork.kubernetes.api.v1.model.FlorkPhase
+import com.microfocus.flork.kubernetes.api.v1.model.*
 import com.microfocus.flork.kubernetes.api.v1.reconcilers.CoroutineFlinkJobReconciler
 import com.microfocus.flork.kubernetes.api.v1.reconcilers.phases.FlinkJobCreatePhase
 import com.microfocus.flork.kubernetes.api.v1.reconcilers.phases.FlinkJobShutdownPhase
@@ -32,13 +31,13 @@ import java.util.concurrent.atomic.AtomicReference
 open class CoroutineFlinkJobReconcilerPhaser internal constructor(
     coroutineScope: CoroutineScope,
     k8sClient: KubernetesClient,
-    lister: AtomicReference<Lister<com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource>?>,
+    lister: AtomicReference<Lister<FlinkJobCustomResource>?>,
     jobKey: String,
     leaseDurationSeconds: Long
-) : AbstractReconcilerPhaser<com.microfocus.flork.kubernetes.api.v1.model.FlinkJobSpec, com.microfocus.flork.kubernetes.api.v1.model.FlinkJobStatus, com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource>(
+) : AbstractReconcilerPhaser<FlinkJobSpec, FlinkJobStatus, FlinkJobCustomResource>(
         coroutineScope,
         k8sClient,
-        com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource::class.java,
+        FlinkJobCustomResource::class.java,
         lister,
         jobKey,
         leaseDurationSeconds
@@ -50,14 +49,14 @@ open class CoroutineFlinkJobReconcilerPhaser internal constructor(
     constructor(
         coroutineScope: CoroutineScope,
         k8sClient: KubernetesClient,
-        lister: AtomicReference<Lister<com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource>?>,
+        lister: AtomicReference<Lister<FlinkJobCustomResource>?>,
         jobKey: String
     ) : this(coroutineScope, k8sClient, lister, jobKey, LEASE_DURATION_SECONDS)
 
     private val setAsDeployedCoroutine = AtomicReference<Job?>()
     private val setAsCompletedCoroutine = AtomicReference<Job?>()
 
-    fun wasGenerationObserved(flinkJob: com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource): Boolean {
+    fun wasGenerationObserved(flinkJob: FlinkJobCustomResource): Boolean {
         return flinkJob.metadata.generation == observedGeneration && flinkJob.metadata.generation == flinkJob.status.generationDuringLastTransition
     }
 
@@ -86,7 +85,7 @@ open class CoroutineFlinkJobReconcilerPhaser internal constructor(
         }
     }
 
-    private suspend fun reconcileIfNecessary(flinkJob: com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource) = coroutineScope {
+    private suspend fun reconcileIfNecessary(flinkJob: FlinkJobCustomResource) = coroutineScope {
         val leadingFlag = leading.get()
         val crChanged = observedGeneration > 0L && flinkJob.metadata.generation != observedGeneration
         val reconciliationNeeded = flinkJob.status.generationDuringLastTransition != null && flinkJob.metadata.generation != flinkJob.status.generationDuringLastTransition
@@ -148,7 +147,7 @@ open class CoroutineFlinkJobReconcilerPhaser internal constructor(
         reconcileIfLeading(flinkJob, leadingFlag)
     }
 
-    private suspend fun reconcileIfLeading(flinkJob: com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource, leadingFlag: Boolean): Unit = coroutineScope {
+    private suspend fun reconcileIfLeading(flinkJob: FlinkJobCustomResource, leadingFlag: Boolean): Unit = coroutineScope {
         observedGeneration = flinkJob.metadata.generation ?: 1L
 
         if (leadingFlag) {
@@ -166,7 +165,7 @@ open class CoroutineFlinkJobReconcilerPhaser internal constructor(
         }
     }
 
-    private suspend fun reconcile(flinkJob: com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource): Unit = coroutineScope {
+    private suspend fun reconcile(flinkJob: FlinkJobCustomResource): Unit = coroutineScope {
         when (flinkJob.status.florkPhase) {
             FlorkPhase.CREATED -> {
                 // if creation returns, flork-phase must be DEPLOYING or FAILED,
@@ -189,18 +188,18 @@ open class CoroutineFlinkJobReconcilerPhaser internal constructor(
         }
     }
 
-    private suspend fun executeCreationPhase(flinkJob: com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource) = coroutineScope {
+    private suspend fun executeCreationPhase(flinkJob: FlinkJobCustomResource) = coroutineScope {
         val phase = FlinkJobCreatePhase(jobKey, deploymentMonitor, flinkJob, crOperations, setAsDeployedCoroutine)
         phase.performInitialDeployment(phaserScope.get())
     }
 
-    private suspend fun executeCompletionPhase(flinkJob: com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource) = coroutineScope {
+    private suspend fun executeCompletionPhase(flinkJob: FlinkJobCustomResource) = coroutineScope {
         val coroutine = phaserScope.get().launch { awaitDeploymentDeletionAndComplete(flinkJob) }
         LOG.info("Waiting for '{}' to terminate.", jobKey)
         setAsCompletedCoroutine.getAndSet(coroutine)?.cancel()
     }
 
-    private suspend fun executeRedeploymentPhase(flinkJob: com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource) = coroutineScope {
+    private suspend fun executeRedeploymentPhase(flinkJob: FlinkJobCustomResource) = coroutineScope {
         try {
             // update status with potential savepoint path, but only update that
             flinkJob.status = executeShutdownPhase(flinkJob).status
@@ -226,7 +225,7 @@ open class CoroutineFlinkJobReconcilerPhaser internal constructor(
         }
     }
 
-    private suspend fun executeShutdownPhase(flinkJob: com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource): com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource = coroutineScope {
+    private suspend fun executeShutdownPhase(flinkJob: FlinkJobCustomResource): FlinkJobCustomResource = coroutineScope {
         LOG.info("Shutting down Flink cluster for '{}'.", jobKey)
         setAsCompletedCoroutine.getAndSet(null)?.cancel()
 
@@ -257,7 +256,7 @@ open class CoroutineFlinkJobReconcilerPhaser internal constructor(
         return@coroutineScope patchStatus(flinkJob, false)
     }
 
-    private suspend fun awaitDeploymentDeletionAndComplete(flinkJob: com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource) = coroutineScope {
+    private suspend fun awaitDeploymentDeletionAndComplete(flinkJob: FlinkJobCustomResource) = coroutineScope {
         runInterruptible { deploymentMonitor.deletionLatch.get().await() }
         LOG.info("Flink job '{}' has either finished, failed, or been cancelled.", jobKey)
 
@@ -281,7 +280,7 @@ open class CoroutineFlinkJobReconcilerPhaser internal constructor(
     }
 
     // generation doesn't change with metadata or status updates
-    private suspend fun patchStatus(flinkJob: com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource, updateGeneration: Boolean = true): com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource = coroutineScope {
+    private suspend fun patchStatus(flinkJob: FlinkJobCustomResource, updateGeneration: Boolean = true): FlinkJobCustomResource = coroutineScope {
         if (updateGeneration) {
             flinkJob.status.generationDuringLastTransition = observedGeneration
         }

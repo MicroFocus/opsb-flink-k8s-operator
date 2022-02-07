@@ -17,7 +17,11 @@
 package com.microfocus.flork.kubernetes.api.v1.handlers
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.microfocus.flork.kubernetes.api.constants.FlorkConstants
+import com.microfocus.flork.kubernetes.api.constants.RuntimeConstants
 import com.microfocus.flork.kubernetes.api.utils.JsonPatchOperation
+import com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource
+import com.microfocus.flork.kubernetes.api.v1.model.FlinkJobStatus
 import com.microfocus.flork.kubernetes.api.v1.reconcilers.factories.CoroutineFlinkJobReconcilerFactoryWithoutCRD
 import com.microfocus.flork.kubernetes.api.v1.reconcilers.phasers.AbstractReconcilerPhaser
 import io.fabric8.kubernetes.api.model.*
@@ -55,8 +59,8 @@ class ConfigMapFlinkJobHandler private constructor(private val k8sClient: Kubern
             val handler = ConfigMapFlinkJobHandler(k8sClient)
             val informer = HandlerUtils.getPopulatedInformer(
                     k8sClient,
-                    com.microfocus.flork.kubernetes.api.constants.FlorkConstants.FLORK_FJ_CM_LABEL,
-                    com.microfocus.flork.kubernetes.api.constants.FlorkConstants.FLORK_FS_CM_LABEL,
+                    FlorkConstants.FLORK_FJ_CM_LABEL,
+                    FlorkConstants.FLORK_FS_CM_LABEL,
                     resyncPeriodSeconds,
                     handler,
                     handler.lister
@@ -96,13 +100,13 @@ class ConfigMapFlinkJobHandler private constructor(private val k8sClient: Kubern
                     .withGeneration(0L)
                     .build()
 
-            val crStatus = com.microfocus.flork.kubernetes.api.v1.model.FlinkJobStatus()
+            val crStatus = FlinkJobStatus()
 
             val statusConfigMap = ConfigMapBuilder()
                     .withNewMetadata()
                     .withName(name)
-                    .addToLabels(com.microfocus.flork.kubernetes.api.constants.FlorkConstants.FLORK_FJ_SCM_LABEL, "true")
-                    .addToLabels(com.microfocus.flork.kubernetes.api.constants.FlorkConstants.METADATA_CM_VALIDITY_LABEL, "false")
+                    .addToLabels(FlorkConstants.FLORK_FJ_SCM_LABEL, "true")
+                    .addToLabels(FlorkConstants.METADATA_CM_VALIDITY_LABEL, "false")
                     .endMetadata()
                     .addToData(STATUS_CM_META_KEY, HandlerUtils.MAPPER.writeValueAsString(crMeta))
                     .addToData(STATUS_CM_STATUS_KEY, HandlerUtils.MAPPER.writeValueAsString(crStatus))
@@ -122,9 +126,9 @@ class ConfigMapFlinkJobHandler private constructor(private val k8sClient: Kubern
             STATUS_CMS[name] = statusConfigMap
         }
 
-        private fun getUnderlyingResource(k8sClient: KubernetesClient, cm: ConfigMap): com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource {
+        private fun getUnderlyingResource(k8sClient: KubernetesClient, cm: ConfigMap): FlinkJobCustomResource {
             val resourceYaml = cm.data["customResource"] ?: throw IllegalArgumentException("Config map does not have key 'customResource'.")
-            val cr = HandlerUtils.unmarshall<com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource>(resourceYaml)
+            val cr = HandlerUtils.unmarshall<FlinkJobCustomResource>(resourceYaml)
 
             val statusConfigMap = getExistingConfigMap(k8sClient, getStatusConfigMapName(cm))
             if (statusConfigMap != null) {
@@ -140,7 +144,7 @@ class ConfigMapFlinkJobHandler private constructor(private val k8sClient: Kubern
             return cr
         }
 
-        private fun maybeUpdateStatusConfigMap(k8sClient: KubernetesClient, name: String, cr: com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource): StatusConfigMap? {
+        private fun maybeUpdateStatusConfigMap(k8sClient: KubernetesClient, name: String, cr: FlinkJobCustomResource): StatusConfigMap? {
             val crKey = if (cr.metadata.namespace == null) {
                 LOG.warn("Namespace of {} was null.", cr.metadata.name)
                 "${k8sClient.namespace}/${cr.metadata.name}"
@@ -165,7 +169,7 @@ class ConfigMapFlinkJobHandler private constructor(private val k8sClient: Kubern
             val patchOperations = mutableListOf(
                     JsonPatchOperation(
                             "replace",
-                            "/metadata/labels/${com.microfocus.flork.kubernetes.api.constants.FlorkConstants.METADATA_CM_VALIDITY_LABEL}",
+                            "/metadata/labels/${FlorkConstants.METADATA_CM_VALIDITY_LABEL}",
                             cr.metadata?.resourceVersion
                     ),
                     JsonPatchOperation(
@@ -195,7 +199,7 @@ class ConfigMapFlinkJobHandler private constructor(private val k8sClient: Kubern
                 return isPodNotLeading(k8sClient, crKey)
             }
 
-            val flag = lease.spec?.holderIdentity != com.microfocus.flork.kubernetes.api.constants.RuntimeConstants.POD_NAME
+            val flag = lease.spec?.holderIdentity != RuntimeConstants.POD_NAME
             LOG.trace("Not leading? {}", flag)
             return flag
         }
@@ -228,7 +232,7 @@ class ConfigMapFlinkJobHandler private constructor(private val k8sClient: Kubern
             val patchOperations = listOf(
                     JsonPatchOperation(
                             "replace",
-                            "/metadata/labels/${com.microfocus.flork.kubernetes.api.constants.FlorkConstants.METADATA_CM_VALIDITY_LABEL}",
+                            "/metadata/labels/${FlorkConstants.METADATA_CM_VALIDITY_LABEL}",
                             "false"
                     ),
                     JsonPatchOperation(
@@ -249,7 +253,7 @@ class ConfigMapFlinkJobHandler private constructor(private val k8sClient: Kubern
 
     private val innerInformer = k8sClient.configMaps()
             .inNamespace(k8sClient.namespace)
-            .withLabel(com.microfocus.flork.kubernetes.api.constants.FlorkConstants.FLORK_FJ_SCM_LABEL)
+            .withLabel(FlorkConstants.FLORK_FJ_SCM_LABEL)
             .inform(StatusConfigMapHandler())
 
     override fun onAdd(obj: ConfigMap) {

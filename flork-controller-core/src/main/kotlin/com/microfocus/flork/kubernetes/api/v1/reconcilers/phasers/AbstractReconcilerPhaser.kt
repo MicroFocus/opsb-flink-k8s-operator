@@ -16,6 +16,7 @@
 
 package com.microfocus.flork.kubernetes.api.v1.reconcilers.phasers
 
+import com.microfocus.flork.kubernetes.api.constants.RuntimeConstants
 import com.microfocus.flork.kubernetes.api.v1.reconcilers.utils.DefaultFlinkResourceOperations
 import com.microfocus.flork.kubernetes.api.v1.reconcilers.utils.FlinkResourceDeploymentMonitor
 import com.microfocus.flork.kubernetes.api.v1.reconcilers.utils.FlinkResourceOperations
@@ -55,7 +56,7 @@ abstract class AbstractReconcilerPhaser<Spec, Status, T : CustomResource<Spec, S
             val deadlineMillis = durationSeconds * 2_000L / 3L
             return LeaderElectionConfigBuilder()
                     .withName(sanitizedKey)
-                    .withLock(LeaseLock(k8sClient.namespace, sanitizedKey, com.microfocus.flork.kubernetes.api.constants.RuntimeConstants.POD_NAME))
+                    .withLock(LeaseLock(k8sClient.namespace, sanitizedKey, RuntimeConstants.POD_NAME))
                     .withLeaseDuration(Duration.ofSeconds(durationSeconds))
                     .withRenewDeadline(Duration.ofMillis(deadlineMillis))
                     .withRetryPeriod(Duration.ofMillis(deadlineMillis / 4L))
@@ -138,7 +139,7 @@ abstract class AbstractReconcilerPhaser<Spec, Status, T : CustomResource<Spec, S
                             .get()
                 }
 
-                val leaseOwnedByMe = lease?.spec?.holderIdentity == com.microfocus.flork.kubernetes.api.constants.RuntimeConstants.POD_NAME
+                val leaseOwnedByMe = lease?.spec?.holderIdentity == RuntimeConstants.POD_NAME
                 if (leaseOwnedByMe) {
                     LOG.info("Waiting 1 lease duration period ({}s) before deleting lease.", leaseDurationSeconds)
                     delay(leaseDurationSeconds * 1000L)
@@ -183,12 +184,12 @@ abstract class AbstractReconcilerPhaser<Spec, Status, T : CustomResource<Spec, S
     
     internal inner class FlinkResourceLeaderCallbacks : LeaderCallbacks(
             {
-                LOG.info("I'm the leader of '{}' now ({}).", jobKey, com.microfocus.flork.kubernetes.api.constants.RuntimeConstants.POD_NAME)
+                LOG.info("I'm the leader of '{}' now ({}).", jobKey, RuntimeConstants.POD_NAME)
                 leading.set(true)
                 callbacks.initialReadinessLatch.countDown()
             },
             {
-                LOG.info("Pod '{}' lost leadership of '{}'.", com.microfocus.flork.kubernetes.api.constants.RuntimeConstants.POD_NAME, jobKey)
+                LOG.info("Pod '{}' lost leadership of '{}'.", RuntimeConstants.POD_NAME, jobKey)
                 leading.set(false)
                 try {
                     onStopLeading()
@@ -198,7 +199,7 @@ abstract class AbstractReconcilerPhaser<Spec, Status, T : CustomResource<Spec, S
                 callbacks.initialReadinessLatch.countDown()
             },
             { newLeaderId ->
-                if (newLeaderId == com.microfocus.flork.kubernetes.api.constants.RuntimeConstants.POD_NAME) {
+                if (newLeaderId == RuntimeConstants.POD_NAME) {
                     LOG.debug("I'm the leader but onNewLeader was called, waiting for onStartLeading.")
                 } else {
                     LOG.info("Pod '{}' is taking over for '{}'.", newLeaderId, jobKey)

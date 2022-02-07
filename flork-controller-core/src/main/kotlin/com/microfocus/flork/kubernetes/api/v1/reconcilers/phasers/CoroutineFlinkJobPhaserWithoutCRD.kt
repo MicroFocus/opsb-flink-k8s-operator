@@ -16,6 +16,9 @@
 
 package com.microfocus.flork.kubernetes.api.v1.reconcilers.phasers
 
+import com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource
+import com.microfocus.flork.kubernetes.api.v1.model.FlinkJobSpec
+import com.microfocus.flork.kubernetes.api.v1.model.FlinkJobStatus
 import com.microfocus.flork.kubernetes.api.v1.reconcilers.utils.ConfigMapFlinkResourceOperations
 import com.microfocus.flork.kubernetes.api.v1.reconcilers.utils.FlinkResourceOperations
 import io.fabric8.kubernetes.client.KubernetesClient
@@ -26,10 +29,10 @@ import java.util.concurrent.atomic.AtomicReference
 class CoroutineFlinkJobPhaserWithoutCRD(
     coroutineScope: CoroutineScope,
     k8sClient: KubernetesClient,
-    lister: AtomicReference<Lister<com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource>?>,
+    lister: AtomicReference<Lister<FlinkJobCustomResource>?>,
     jobKey: String
 ) : CoroutineFlinkJobReconcilerPhaser(coroutineScope, k8sClient, lister, jobKey) {
-    override val crOperations: FlinkResourceOperations<com.microfocus.flork.kubernetes.api.v1.model.FlinkJobSpec, com.microfocus.flork.kubernetes.api.v1.model.FlinkJobStatus, com.microfocus.flork.kubernetes.api.v1.model.FlinkJobCustomResource> by lazy {
+    override val crOperations: FlinkResourceOperations<FlinkJobSpec, FlinkJobStatus, FlinkJobCustomResource> by lazy {
         ConfigMapFlinkResourceOperations(super.k8sClient)
     }
 }

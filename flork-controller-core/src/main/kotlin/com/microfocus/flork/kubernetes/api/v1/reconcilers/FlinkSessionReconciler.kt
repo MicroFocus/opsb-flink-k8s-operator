@@ -16,8 +16,10 @@
 
 package com.microfocus.flork.kubernetes.api.v1.reconcilers
 
-interface FlinkSessionReconciler {
-    fun reconcile(flinkSession: com.microfocus.flork.kubernetes.api.v1.model.FlinkSessionCustomResource)
+import com.microfocus.flork.kubernetes.api.v1.model.FlinkSessionCustomResource
 
-    fun delete(flinkSession: com.microfocus.flork.kubernetes.api.v1.model.FlinkSessionCustomResource)
+interface FlinkSessionReconciler {
+    fun reconcile(flinkSession: FlinkSessionCustomResource)
+
+    fun delete(flinkSession: FlinkSessionCustomResource)
 }

@@ -22,7 +22,7 @@ import java.io.Serializable
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 data class FlinkSessionSpec(
-    var florkConf: com.microfocus.flork.kubernetes.api.v1.model.FlorkConf = com.microfocus.flork.kubernetes.api.v1.model.FlorkConf(),
+    var florkConf: FlorkConf = FlorkConf(),
     var flinkConf: MutableMap<String, Any> = mutableMapOf(),
     var jobManagerPodSpec: PodSpec = PodSpec(),
     var taskManagerPodSpec: PodSpec? = null,
