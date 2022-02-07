@@ -22,7 +22,7 @@ For a basic build simply run:
 ## CRD
 
 The YAML template is [here](helm/flork/templates/flink-job-crd.yaml),
-with the corresponding POJO [here](flork-model/src/main/java/com/itom/flork/kubernetes/api/v1/model/FlinkJobCustomResource.java).
+with the corresponding POJO [here](flork-model/src/main/java/com/microfocus/flork/kubernetes/api/v1/model/FlinkJobCustomResource.java).
 Note that the embedded Kubernetes resources use the schema from the official OpenAPI spec,
 see also the [flattening helper](json-schema-flattener).
 
@@ -34,13 +34,13 @@ so it cannot be a sub-chart of any other chart that intends to use the CRD.
 
 The flow is as follows:
 
-1. A [handler](flork-controller-core/src/main/kotlin/com/itom/flork/kubernetes/api/v1/handlers/FlinkJobHandler.kt)
+1. A [handler](flork-controller-core/src/main/kotlin/com/microfocus/flork/kubernetes/api/v1/handlers/FlinkJobHandler.kt)
 receives resource updates from Kubernetes and delegates to a reconciler.
 One handler instance will manage either 1 or all namespaces, more on this in the multi-tenancy section below.
-2. The [reconciler](flork-controller-core/src/main/kotlin/com/itom/flork/kubernetes/api/v1/reconcilers/CoroutineFlinkJobReconciler.kt)
+2. The [reconciler](flork-controller-core/src/main/kotlin/com/microfocus/flork/kubernetes/api/v1/reconcilers/CoroutineFlinkJobReconciler.kt)
 manages phasers for the different resources and basic cleanup.
-3. The [phaser](flork-controller-core/src/main/kotlin/com/itom/flork/kubernetes/api/v1/reconcilers/phasers/CoroutineFlinkJobReconcilerPhaser.kt)
-decides which [phases](flork-controller-core/src/main/kotlin/com/itom/flork/kubernetes/api/v1/reconcilers/phases) to execute and in which order.
+3. The [phaser](flork-controller-core/src/main/kotlin/com/microfocus/flork/kubernetes/api/v1/reconcilers/phasers/CoroutineFlinkJobReconcilerPhaser.kt)
+decides which [phases](flork-controller-core/src/main/kotlin/com/microfocus/flork/kubernetes/api/v1/reconcilers/phases) to execute and in which order.
 
 High availability of the controller(s) is supported and the default number of replicas is 2.
 
@@ -55,12 +55,12 @@ Note that the controller tries to communicate with Flink's job manager with the 
 and it assumes that, if TLS is enabled for REST communication in the Flink cluster,
 the controller gets Flink's CA certificate injected in a trust store,
 and Flink will trust the controller's certificate if needed;
-see `getDescriptorWithTlsIfNeeded` in [`FlorkUtils`](flork-controller-core/src/main/kotlin/com/itom/flork/kubernetes/api/utils/FlorkUtils.kt)
+see `getDescriptorWithTlsIfNeeded` in [`FlorkUtils`](flork-controller-core/src/main/kotlin/com/microfocus/flork/kubernetes/api/utils/FlorkUtils.kt)
 and [this sample script](microservice/src/main/container-resources/flork/bin/tls-stores-setup.sh).
 
 ### Validation
 
-A class for resource validation is [available](flork-controller-core/src/main/java/com/itom/flork/kubernetes/api/v1/validators/FlinkJobValidator.java).
+A class for resource validation is [available](flork-controller-core/src/main/java/com/microfocus/flork/kubernetes/api/v1/validators/FlinkJobValidator.java).
 The sample Helm chart [takes this into account](helm/flork/templates/flork-admission-webhooks.yaml).
 
 ## Multi-tenancy
@@ -97,12 +97,12 @@ It's not possible to constraint validation to specific instances because that wo
 
 To deploy a Flink cluster, 3 resources are prepared locally by the controller:
 `flink-conf.yaml` and two pod templates for job and task manager(s);
-see `prepareConfFilesFromSpec` in [here](flork-controller-core/src/main/kotlin/com/itom/flork/kubernetes/api/utils/FlinkConfUtils.kt).
+see `prepareConfFilesFromSpec` in [here](flork-controller-core/src/main/kotlin/com/microfocus/flork/kubernetes/api/utils/FlinkConfUtils.kt).
 Before writing the corresponding files to (local, ephemeral) disk,
-the code will search for [decorators](flork-model/src/main/java/com/itom/flork/kubernetes/api/plugins) using Java's `ServiceLoader` features.
+the code will search for [decorators](flork-model/src/main/java/com/microfocus/flork/kubernetes/api/plugins) using Java's `ServiceLoader` features.
 Thus, a consumer could take a base container image and extend it with custom logic by simply adding jars with implementers of the decorator interfaces.
 
-The decorators get an instance of [`florkConf`](flork-model/src/main/java/com/itom/flork/kubernetes/api/v1/model/FlorkConf.java) which,
+The decorators get an instance of [`florkConf`](flork-model/src/main/java/com/microfocus/flork/kubernetes/api/v1/model/FlorkConf.java) which,
 since the CRD specifies `x-kubernetes-preserve-unknown-fields: true` for it,
 may contain custom properties and/or nested objects.
 
@@ -110,8 +110,8 @@ may contain custom properties and/or nested objects.
 
 Some helper classes for IoC are included in the `flork-controller-ioc` module.
 For example, the REST controller for validation endpoints can be found
-[here](flork-controller-ioc/src/main/java/com/itom/flork/kubernetes/api/v1/controllers/webhooks/ValidatingWebhooksController.java),
-and the Kubernetes controller [here](flork-controller-ioc/src/main/java/com/itom/flork/kubernetes/api/v1/controllers/FlinkResourceController.java).
+[here](flork-controller-ioc/src/main/java/com/microfocus/flork/kubernetes/api/v1/controllers/webhooks/ValidatingWebhooksController.java),
+and the Kubernetes controller [here](flork-controller-ioc/src/main/java/com/microfocus/flork/kubernetes/api/v1/controllers/FlinkResourceController.java).
 
 ### Spring Boot
 
