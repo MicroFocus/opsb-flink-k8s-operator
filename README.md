@@ -3,6 +3,13 @@
 Sample Kubernetes controller for [Flink](https://flink.apache.org/) resources.
 The documentation here currently only discusses deployment with Custom Resource Definition (CRD)
 targeting Flink's application mode with native Kubernetes integration.
+The main uses cases are:
+
+1. Streaming Flink applications that desire savepoint management during redeployment, e.g. after upgrades or scaling.
+2. Batch Flink applications that may desire different levels of parallelism each time they run.
+
+Everything here is a Proof of Concept and has been tested against Kubernetes 1.21,
+but the included unit tests are mostly just sanity checkers.
 
 Note: the project can be opened in IntelliJ by opening the [root `build.gradle`](build.gradle) as a Project.
 It currently builds with Java 17 as configured [here](buildSrc/build.gradle) and [here](buildSrc/src/main/groovy/itom-java-plugin.gradle).
@@ -89,7 +96,7 @@ It's not possible to constraint validation to specific instances because that wo
 ## Customization
 
 To deploy a Flink cluster, 3 resources are prepared locally by the controller:
-the `flink-conf.yaml` and two pod templates for job and task manager(s);
+`flink-conf.yaml` and two pod templates for job and task manager(s);
 see `prepareConfFilesFromSpec` in [here](flork-controller-core/src/main/kotlin/com/itom/flork/kubernetes/api/utils/FlinkConfUtils.kt).
 Before writing the corresponding files to (local, ephemeral) disk,
 the code will search for [decorators](flork-model/src/main/java/com/itom/flork/kubernetes/api/plugins) using Java's `ServiceLoader` features.
