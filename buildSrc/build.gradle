@@ -35,5 +35,5 @@ repositories {
 
 dependencies {
     implementation "org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin:$kotlinVersion"
-    implementation "com.github.johnrengelman.shadow:com.github.johnrengelman.shadow.gradle.plugin:7.0.0"
+    implementation "com.github.johnrengelman.shadow:com.github.johnrengelman.shadow.gradle.plugin:7.1.2"
 }
