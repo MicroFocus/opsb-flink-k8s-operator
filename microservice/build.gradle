@@ -27,7 +27,7 @@ ext {
 }
 
 application {
-    mainClass.set("com.itom.flork.spring.FlorkSpringMain")
+    mainClass.set("com.microfocus.flork.spring.FlorkSpringMain")
 }
 
 dependencies {
@@ -59,7 +59,7 @@ swagger {
         swaggerFileName = "openapi"
         springmvc = false
         outputFormats = ["yaml", "json"]
-        locations = ["com.itom.flork.kubernetes.api"]
+        locations = ["com.microfocus.flork.kubernetes.api"]
         schemes = ["https"]
         host = "itom-flork:8443"
         basePath = "/"

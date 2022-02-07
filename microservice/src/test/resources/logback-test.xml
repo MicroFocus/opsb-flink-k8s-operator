@@ -9,5 +9,5 @@
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
-    <logger name="com.itom.flork" level="DEBUG" additivity="true"/>
+    <logger name="com.microfocus.flork" level="DEBUG" additivity="true"/>
 </configuration>

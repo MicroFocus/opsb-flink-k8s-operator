@@ -19,4 +19,4 @@
 
 exec java -Xms500m -Xmx500m \
   -Djavax.net.ssl.keyStoreType=PKCS12 -Djavax.net.ssl.trustStoreType=PKCS12 \
-  -cp '/opt/flork/app/lib/*' com.itom.flork.spring.FlorkSpringMain
+  -cp '/opt/flork/app/lib/*' com.microfocus.flork.spring.FlorkSpringMain
