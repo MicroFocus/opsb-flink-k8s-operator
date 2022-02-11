@@ -27,6 +27,7 @@ dependencies {
     api project(":flork-model")
     api project(path: ":flink-kubernetes-shadow", configuration: "shadow")
 
+    implementation libraries.jacksonKotlin
     implementation libraries.jacksonYaml
     implementation "org.apache.commons:commons-lang3:3.12.0"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.6.0"

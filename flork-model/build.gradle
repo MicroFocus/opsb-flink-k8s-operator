@@ -21,10 +21,17 @@ plugins {
 }
 
 dependencies {
-    api "io.fabric8:kubernetes-model-core:$fabric8Version"
+    api("io.fabric8:kubernetes-model-common:$fabric8Version") {
+        transitive = false
+    }
+    api("io.fabric8:kubernetes-model-core:$fabric8Version") {
+        transitive = false
+    }
     api(libraries.k8sClient) {
         transitive = false
     }
 
-    implementation libraries.jacksonKotlin
+    implementation("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion") {
+        transitive = false
+    }
 }
